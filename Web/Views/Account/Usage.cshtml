@@ -1,0 +1,56 @@
+@model UsageSummary
+@{
+    ViewData["Title"] = "Your usage";
+}
+
+<h1 class="h3 mb-1">Your usage</h1>
+<p class="text-body-secondary">
+    Current package: <span class="badge text-bg-secondary">@Model.PackageName</span>
+</p>
+
+@if (Model.PendingPackageName is not null)
+{
+    <div class="alert alert-info">
+        Switching to <strong>@Model.PendingPackageName</strong>
+        on @Model.PendingPackageEffectiveDate?.ToString("yyyy-MM-dd").
+    </div>
+}
+
+<div class="row g-4 mt-1">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h6">Uploads today</h2>
+                <p class="display-6 mb-1">@Model.UploadsToday <small class="fs-6 text-body-secondary">/ @Model.DailyUploadLimit</small></p>
+                <div class="progress" role="progressbar" aria-valuenow="@Model.DailyUploadPercentage" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" style="width: @Model.DailyUploadPercentage.ToString("0.##")%"></div>
+                </div>
+                <p class="small text-body-secondary mt-2 mb-0">@Model.RemainingUploadsToday remaining today</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h6">Storage used</h2>
+                <p class="display-6 mb-1">
+                    @ByteSize.Humanize(Model.TotalBytesStored)
+                    <small class="fs-6 text-body-secondary">/ @ByteSize.Humanize(Model.MaxTotalStorageBytes)</small>
+                </p>
+                <div class="progress" role="progressbar" aria-valuenow="@Model.StoragePercentage" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" style="width: @Model.StoragePercentage.ToString("0.##")%"></div>
+                </div>
+                <p class="small text-body-secondary mt-2 mb-0">@ByteSize.Humanize(Model.RemainingStorageBytes) remaining</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<dl class="row mt-4">
+    <dt class="col-sm-4">Maximum photo size</dt>
+    <dd class="col-sm-8">@ByteSize.Humanize(Model.MaxUploadSizeBytes)</dd>
+
+    <dt class="col-sm-4">Uploaded today</dt>
+    <dd class="col-sm-8">@ByteSize.Humanize(Model.BytesUploadedToday)</dd>
+</dl>

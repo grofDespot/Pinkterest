@@ -2,10 +2,12 @@
     ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
+<div class="text-center py-5">
     <h1 class="display-4">Pinkterest</h1>
     <p class="lead">Upload, browse and share photos.</p>
-    <p class="text-body-secondary">
-        The database schema, Identity tables, roles and packages are provisioned.
-    </p>
+
+    @if (User.Identity?.IsAuthenticated != true)
+    {
+        <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg mt-3">Create an account</a>
+    }
 </div>

@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Mvc;
 using Pinkterest.Application.Common.Interfaces;
+using Pinkterest.Domain.Constants;
 using Pinkterest.Infrastructure;
 using Pinkterest.Infrastructure.Persistence.Seeding;
 using Pinkterest.Web.Services;
@@ -8,7 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
-builder.Services.AddControllersWithViews();
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+});
+
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(Policies.IsAdministrator, policy =>
+        policy.RequireRole(Roles.Administrator))
+    .AddPolicy(Policies.IsRegisteredUser, policy =>
+        policy.RequireRole(Roles.RegisteredUser, Roles.Administrator));
 
 builder.Services.ConfigureApplicationCookie(options =>
 {

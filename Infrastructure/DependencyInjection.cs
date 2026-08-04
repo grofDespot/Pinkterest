@@ -2,10 +2,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Pinkterest.Application.Accounts;
 using Pinkterest.Application.Common.Interfaces;
+using Pinkterest.Application.Packages;
+using Pinkterest.Application.Usage;
 using Pinkterest.Domain.Entities;
+using Pinkterest.Infrastructure.Identity;
+using Pinkterest.Infrastructure.Packages;
 using Pinkterest.Infrastructure.Persistence;
 using Pinkterest.Infrastructure.Persistence.Seeding;
+using Pinkterest.Infrastructure.Usage;
 
 namespace Pinkterest.Infrastructure;
 
@@ -37,6 +43,10 @@ public static class DependencyInjection
         })
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
+
+        services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IPackageCatalog, PackageCatalog>();
+        services.AddScoped<IUsageQuery, UsageQuery>();
 
         return services;
     }

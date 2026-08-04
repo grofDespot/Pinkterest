@@ -1,0 +1,78 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Create an account";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="h3 mb-4">Create an account</h1>
+
+        <form asp-action="Register" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none-when-empty"></div>
+
+            <div class="mb-3">
+                <label asp-for="DisplayName" class="form-label"></label>
+                <input asp-for="DisplayName" class="form-control" autocomplete="nickname" />
+                <span asp-validation-for="DisplayName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" autocomplete="username" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ConfirmPassword" class="form-label"></label>
+                    <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+            </div>
+
+            <fieldset class="mb-4">
+                <legend class="h6">Choose a package</legend>
+                <span asp-validation-for="PackageId" class="text-danger"></span>
+
+                <div class="row g-3">
+                    @foreach (var package in Model.Packages)
+                    {
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" asp-for="PackageId"
+                                               value="@package.Id" id="package-@package.Id" />
+                                        <label class="form-check-label fw-semibold" for="package-@package.Id">
+                                            @package.Name
+                                        </label>
+                                    </div>
+                                    <p class="mb-1 mt-2">
+                                        @(package.MonthlyPrice == 0 ? "Free" : $"€{package.MonthlyPrice:0.00} / month")
+                                    </p>
+                                    <ul class="list-unstyled small text-body-secondary mb-0">
+                                        <li>Up to @ByteSize.Humanize(package.MaxUploadSizeBytes) per photo</li>
+                                        <li>@package.DailyUploadLimit uploads per day</li>
+                                        <li>@ByteSize.Humanize(package.MaxTotalStorageBytes) total storage</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary">Create account</button>
+            <a asp-action="Login" class="btn btn-link">I already have an account</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

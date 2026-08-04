@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="App/App.csproj" />
+  <Project Path="CrossCutting/CrossCutting.csproj" />
+  <Project Path="Domain/Domain.csproj" />
+  <Project Path="Infrastructure/Infrastructure.csproj" />
+  <Project Path="Web/Web.csproj" Id="4a1ef4c6-f21e-4f50-9501-ca8e24935c17" />
+</Solution>

@@ -1,0 +1,76 @@
+@model UploadPhotoViewModel
+@{
+    ViewData["Title"] = "Upload a photo";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="h3 mb-4">Upload a photo</h1>
+
+        @if (TempData["UploadedPhotoId"] is string uploadedId)
+        {
+            <div class="alert alert-success">Photo uploaded. Reference: <code>@uploadedId</code></div>
+        }
+
+        <form asp-action="Upload" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none-when-empty"></div>
+
+            <div class="mb-3">
+                <label asp-for="File" class="form-label"></label>
+                <input asp-for="File" type="file" class="form-control" accept="image/jpeg,image/png,image/bmp" />
+                <span asp-validation-for="File" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Hashtags" class="form-label"></label>
+                <input asp-for="Hashtags" class="form-control" placeholder="sunset, beach, summer" />
+                <div class="form-text">Separate with spaces or commas. The leading # is optional.</div>
+                <span asp-validation-for="Hashtags" class="text-danger"></span>
+            </div>
+
+            <fieldset class="border rounded p-3 mb-4">
+                <legend class="h6 float-none w-auto px-2">Processing before saving</legend>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Format" class="form-label"></label>
+                        <select asp-for="Format" asp-items="Html.GetEnumSelectList<ImageOutputFormat>()" class="form-select"></select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="MaxWidth" class="form-label"></label>
+                        <input asp-for="MaxWidth" class="form-control" placeholder="leave empty to keep" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="MaxHeight" class="form-label"></label>
+                        <input asp-for="MaxHeight" class="form-control" placeholder="leave empty to keep" />
+                    </div>
+                </div>
+
+                <div>
+                    <span class="form-label d-block">Filters</span>
+                    @foreach (var filter in Model.AvailableFilters)
+                    {
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="SelectedFilters"
+                                   value="@filter" id="filter-@filter"
+                                   checked="@Model.SelectedFilters.Contains(filter)" />
+                            <label class="form-check-label text-capitalize" for="filter-@filter">@filter</label>
+                        </div>
+                    }
+                </div>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

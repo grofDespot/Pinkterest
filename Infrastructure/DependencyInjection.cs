@@ -5,12 +5,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Pinkterest.Application.Accounts;
 using Pinkterest.Application.Common.Interfaces;
 using Pinkterest.Application.Packages;
+using Pinkterest.Application.Photos;
+using Pinkterest.Application.Photos.Processing;
+using Pinkterest.Application.Photos.Storage;
 using Pinkterest.Application.Usage;
 using Pinkterest.Domain.Entities;
 using Pinkterest.Infrastructure.Identity;
 using Pinkterest.Infrastructure.Packages;
 using Pinkterest.Infrastructure.Persistence;
 using Pinkterest.Infrastructure.Persistence.Seeding;
+using Pinkterest.Infrastructure.Photos;
+using Pinkterest.Infrastructure.Storage;
 using Pinkterest.Infrastructure.Usage;
 
 namespace Pinkterest.Infrastructure;
@@ -27,6 +32,7 @@ public static class DependencyInjection
         services.AddSingleton(TimeProvider.System);
 
         services.AddOptions<SeedOptions>().Bind(configuration.GetSection(SeedOptions.SectionName));
+        services.AddOptions<StorageOptions>().Bind(configuration.GetSection(StorageOptions.SectionName));
         services.AddScoped<DatabaseSeeder>();
 
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -47,6 +53,12 @@ public static class DependencyInjection
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IPackageCatalog, PackageCatalog>();
         services.AddScoped<IUsageQuery, UsageQuery>();
+
+        services.AddScoped<LocalFileSystemPhotoStorage>();
+        services.AddScoped<IPhotoStorageFactory, PhotoStorageFactory>();
+        services.AddScoped<IPhotoStorage>(sp => sp.GetRequiredService<IPhotoStorageFactory>().Create());
+        services.AddSingleton<IImageProcessor, ImageProcessor>();
+        services.AddScoped<IPhotoUploadService, PhotoUploadService>();
 
         return services;
     }

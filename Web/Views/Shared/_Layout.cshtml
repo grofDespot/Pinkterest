@@ -26,6 +26,9 @@
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Photos" asp-action="Upload">Upload</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Account" asp-action="Usage">Usage</a>
                             </li>
                         }

@@ -6,8 +6,10 @@
     <h1 class="display-4">Pinkterest</h1>
     <p class="lead">Upload, browse and share photos.</p>
 
+    <a asp-controller="Gallery" asp-action="Index" class="btn btn-primary btn-lg mt-3">Browse the gallery</a>
+
     @if (User.Identity?.IsAuthenticated != true)
     {
-        <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg mt-3">Create an account</a>
+        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-secondary btn-lg mt-3">Create an account</a>
     }
 </div>

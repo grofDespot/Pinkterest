@@ -1,0 +1,46 @@
+@model PhotoDetail
+@{
+    ViewData["Title"] = "Photo";
+    var canEdit = User.Identity?.IsAuthenticated == true &&
+                  (User.IsInRole(Roles.Administrator) ||
+                   User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.OwnerId.ToString());
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <img src="@Url.Action("Raw", new { id = Model.Id })" class="img-fluid rounded" alt="@Model.Description" />
+    </div>
+    <div class="col-lg-4">
+        <h1 class="h4">@Model.AuthorDisplayName</h1>
+        <p class="text-body-secondary">@Model.UploadedUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</p>
+
+        <p>@(string.IsNullOrWhiteSpace(Model.Description) ? "(no description)" : Model.Description)</p>
+
+        <div class="mb-3">
+            @foreach (var hashtag in Model.Hashtags)
+            {
+                <span class="badge text-bg-light">#@hashtag</span>
+            }
+        </div>
+
+        <dl class="row small">
+            <dt class="col-5">Dimensions</dt>
+            <dd class="col-7">@Model.Width × @Model.Height</dd>
+
+            <dt class="col-5">Size</dt>
+            <dd class="col-7">@ByteSize.Humanize(Model.SizeBytes)</dd>
+
+            <dt class="col-5">Type</dt>
+            <dd class="col-7">@Model.ContentType</dd>
+
+            <dt class="col-5">File name</dt>
+            <dd class="col-7 text-break">@Model.OriginalFileName</dd>
+        </dl>
+
+        @if (canEdit)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Edit details</a>
+        }
+        <a asp-action="Index" class="btn btn-link">Back to gallery</a>
+    </div>
+</div>

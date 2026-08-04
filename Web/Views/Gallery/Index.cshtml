@@ -1,0 +1,50 @@
+@model IReadOnlyList<PhotoSummary>
+@{
+    ViewData["Title"] = "Gallery";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Latest photos</h1>
+        <p class="text-body-secondary mb-0">The @Model.Count most recent uploads.</p>
+    </div>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a asp-controller="Photos" asp-action="Upload" class="btn btn-primary">Upload a photo</a>
+    }
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-secondary">Nothing has been uploaded yet.</div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var photo in Model)
+        {
+            <div class="col-sm-6 col-lg-4 col-xl-3">
+                <div class="card h-100">
+                    <a asp-action="Details" asp-route-id="@photo.Id">
+                        <img src="@Url.Action("Thumbnail", new { id = photo.Id })"
+                             class="card-img-top" alt="@photo.Description" loading="lazy" />
+                    </a>
+                    <div class="card-body">
+                        <p class="card-text">
+                            @(string.IsNullOrWhiteSpace(photo.Description) ? "(no description)" : photo.Description)
+                        </p>
+                        <ul class="list-unstyled small text-body-secondary mb-2">
+                            <li>@photo.AuthorDisplayName</li>
+                            <li>@photo.UploadedUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</li>
+                            <li>@photo.Width × @photo.Height · @ByteSize.Humanize(photo.SizeBytes)</li>
+                        </ul>
+                        @foreach (var hashtag in photo.Hashtags)
+                        {
+                            <span class="badge text-bg-light">#@hashtag</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

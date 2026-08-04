@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Pinkterest.Application.Accounts;
@@ -30,6 +31,7 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
         services.AddSingleton(TimeProvider.System);
+        services.AddMemoryCache(options => options.SizeLimit = 64L * 1024 * 1024);
 
         services.AddOptions<SeedOptions>().Bind(configuration.GetSection(SeedOptions.SectionName));
         services.AddOptions<StorageOptions>().Bind(configuration.GetSection(StorageOptions.SectionName));
@@ -56,9 +58,13 @@ public static class DependencyInjection
 
         services.AddScoped<LocalFileSystemPhotoStorage>();
         services.AddScoped<IPhotoStorageFactory, PhotoStorageFactory>();
-        services.AddScoped<IPhotoStorage>(sp => sp.GetRequiredService<IPhotoStorageFactory>().Create());
+        services.AddScoped<IPhotoStorage>(sp => new CachingPhotoStorageProxy(
+            sp.GetRequiredService<IPhotoStorageFactory>().Create(),
+            sp.GetRequiredService<IMemoryCache>()));
         services.AddSingleton<IImageProcessor, ImageProcessor>();
         services.AddScoped<IPhotoUploadService, PhotoUploadService>();
+        services.AddScoped<IPhotoRepository, PhotoRepository>();
+        services.AddScoped<IPhotoEditService, PhotoEditService>();
 
         return services;
     }

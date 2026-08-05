@@ -9,8 +9,8 @@ public sealed class OrSpecification<T>(Specification<T> left, Specification<T> r
         var parameter = Expression.Parameter(typeof(T), "candidate");
 
         var body = Expression.OrElse(
-            new ParameterReplacer(parameter).Visit(left.ToExpression().Body)!,
-            new ParameterReplacer(parameter).Visit(right.ToExpression().Body)!);
+            SpecificationExpression.Rebind(left.ToExpression(), parameter),
+            SpecificationExpression.Rebind(right.ToExpression(), parameter));
 
         return Expression.Lambda<Func<T, bool>>(body, parameter);
     }

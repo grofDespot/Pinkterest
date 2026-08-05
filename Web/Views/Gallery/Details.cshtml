@@ -19,7 +19,7 @@
         <div class="mb-3">
             @foreach (var hashtag in Model.Hashtags)
             {
-                <span class="badge text-bg-light">#@hashtag</span>
+                <a asp-action="Search" asp-route-Hashtag="@hashtag" class="badge text-bg-light text-decoration-none">#@hashtag</a>
             }
         </div>
 
@@ -37,10 +37,54 @@
             <dd class="col-7 text-break">@Model.OriginalFileName</dd>
         </dl>
 
+        <a asp-action="Download" asp-route-id="@Model.Id" class="btn btn-primary w-100 mb-3">
+            Download original
+        </a>
+
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h6">Download with filters</h2>
+
+                <form asp-action="Download" method="get">
+                    <input type="hidden" name="id" value="@Model.Id" />
+
+                    <div class="mb-2">
+                        <label for="Format" class="form-label small">Format</label>
+                        <select name="Format" id="Format" class="form-select form-select-sm"
+                                asp-items="Html.GetEnumSelectList<ImageOutputFormat>()"></select>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label for="MaxWidth" class="form-label small">Max width</label>
+                            <input type="number" name="MaxWidth" id="MaxWidth" class="form-control form-control-sm" min="0" />
+                        </div>
+                        <div class="col-6">
+                            <label for="MaxHeight" class="form-label small">Max height</label>
+                            <input type="number" name="MaxHeight" id="MaxHeight" class="form-control form-control-sm" min="0" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        @foreach (var filter in ImageFilterCatalog.AvailableFilters)
+                        {
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="Filters"
+                                       value="@filter" id="dl-@filter" />
+                                <label class="form-check-label text-capitalize small" for="dl-@filter">@filter</label>
+                            </div>
+                        }
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-primary btn-sm w-100">Download</button>
+                </form>
+            </div>
+        </div>
+
         @if (canEdit)
         {
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">Edit details</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary mt-3">Edit details</a>
         }
-        <a asp-action="Index" class="btn btn-link">Back to gallery</a>
+        <a asp-action="Index" class="btn btn-link mt-3">Back to gallery</a>
     </div>
 </div>

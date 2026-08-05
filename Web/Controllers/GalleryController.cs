@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Pinkterest.Application.Common.Interfaces;
 using Pinkterest.Application.Common.Specifications;
 using Pinkterest.Application.Photos;
+using Pinkterest.Application.Photos.Download;
+using Pinkterest.Application.Photos.Search;
 using Pinkterest.Application.Photos.Storage;
 using Pinkterest.Domain.Constants;
 using Pinkterest.Domain.Entities;
@@ -14,6 +16,8 @@ namespace Pinkterest.Web.Controllers;
 public class GalleryController(
     IPhotoRepository repository,
     IPhotoEditService editService,
+    IPhotoSearchService searchService,
+    IPhotoDownloadService downloadService,
     IPhotoStorage storage,
     ICurrentUser currentUser) : Controller
 {
@@ -34,6 +38,35 @@ public class GalleryController(
         var photo = await repository.GetDetailAsync(id, cancellationToken);
 
         return photo is null ? NotFound() : View(photo);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Search(PhotoSearchViewModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        model.Results = await searchService.SearchAsync(model.ToQuery(), cancellationToken);
+        return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Download(
+        Guid id,
+        DownloadOptionsViewModel options,
+        CancellationToken cancellationToken)
+    {
+        var result = await downloadService.PrepareAsync(id, options.ToProcessingOptions(), cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return NotFound();
+        }
+
+        var download = result.Value;
+        return File(download.Content, download.ContentType, download.FileName);
     }
 
     [HttpGet]

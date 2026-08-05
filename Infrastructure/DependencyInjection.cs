@@ -7,7 +7,9 @@ using Pinkterest.Application.Accounts;
 using Pinkterest.Application.Common.Interfaces;
 using Pinkterest.Application.Packages;
 using Pinkterest.Application.Photos;
+using Pinkterest.Application.Photos.Download;
 using Pinkterest.Application.Photos.Processing;
+using Pinkterest.Application.Photos.Search;
 using Pinkterest.Application.Photos.Storage;
 using Pinkterest.Application.Usage;
 using Pinkterest.Domain.Entities;
@@ -65,6 +67,8 @@ public static class DependencyInjection
         services.AddScoped<IPhotoUploadService, PhotoUploadService>();
         services.AddScoped<IPhotoRepository, PhotoRepository>();
         services.AddScoped<IPhotoEditService, PhotoEditService>();
+        services.AddScoped<IPhotoSearchService, PhotoSearchService>();
+        services.AddScoped<IPhotoDownloadService, PhotoDownloadService>();
 
         return services;
     }

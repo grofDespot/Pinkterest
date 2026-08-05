@@ -1,0 +1,117 @@
+@model PhotoSearchViewModel
+@{
+    ViewData["Title"] = "Search photos";
+}
+
+<h1 class="h3 mb-4">Search photos</h1>
+
+<form asp-action="Search" method="get" class="card card-body mb-4">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label asp-for="Hashtag" class="form-label"></label>
+            <input asp-for="Hashtag" class="form-control" placeholder="sunset" />
+            <span asp-validation-for="Hashtag" class="text-danger"></span>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="Author" class="form-label"></label>
+            <input asp-for="Author" class="form-control" />
+            <span asp-validation-for="Author" class="text-danger"></span>
+        </div>
+        <div class="col-md-2">
+            <label asp-for="MinSizeKb" class="form-label"></label>
+            <input asp-for="MinSizeKb" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label asp-for="MaxSizeKb" class="form-label"></label>
+            <input asp-for="MaxSizeKb" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label asp-for="UploadedFrom" class="form-label"></label>
+            <input asp-for="UploadedFrom" type="date" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label asp-for="UploadedTo" class="form-label"></label>
+            <input asp-for="UploadedTo" type="date" class="form-control" />
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a asp-action="Search" class="btn btn-link">Clear</a>
+    </div>
+</form>
+
+@if (Model.Results is { } results)
+{
+    <p class="text-body-secondary">
+        @results.TotalCount photo(s) found — page @results.Page of @Math.Max(1, results.TotalPages)
+    </p>
+
+    @if (results.Photos.Count == 0)
+    {
+        <div class="alert alert-secondary">No photos match those filters.</div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var photo in results.Photos)
+            {
+                <div class="col-sm-6 col-lg-4 col-xl-3">
+                    <div class="card h-100">
+                        <a asp-action="Details" asp-route-id="@photo.Id">
+                            <img src="@Url.Action("Thumbnail", new { id = photo.Id })"
+                                 class="card-img-top" alt="@photo.Description" loading="lazy" />
+                        </a>
+                        <div class="card-body">
+                            <p class="card-text">
+                                @(string.IsNullOrWhiteSpace(photo.Description) ? "(no description)" : photo.Description)
+                            </p>
+                            <ul class="list-unstyled small text-body-secondary mb-2">
+                                <li>@photo.AuthorDisplayName</li>
+                                <li>@photo.UploadedUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</li>
+                                <li>@ByteSize.Humanize(photo.SizeBytes)</li>
+                            </ul>
+                            @foreach (var hashtag in photo.Hashtags)
+                            {
+                                <span class="badge text-bg-light">#@hashtag</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <nav class="mt-4">
+            <ul class="pagination">
+                <li class="page-item @(results.HasPreviousPage ? "" : "disabled")">
+                    <a class="page-link"
+                       asp-action="Search"
+                       asp-all-route-data="@(new Dictionary<string, string?>
+                       {
+                           ["Hashtag"] = Model.Hashtag,
+                           ["Author"] = Model.Author,
+                           ["MinSizeKb"] = Model.MinSizeKb?.ToString(),
+                           ["MaxSizeKb"] = Model.MaxSizeKb?.ToString(),
+                           ["UploadedFrom"] = Model.UploadedFrom?.ToString("yyyy-MM-dd"),
+                           ["UploadedTo"] = Model.UploadedTo?.ToString("yyyy-MM-dd"),
+                           ["Page"] = (results.Page - 1).ToString()
+                       })">Previous</a>
+                </li>
+                <li class="page-item @(results.HasNextPage ? "" : "disabled")">
+                    <a class="page-link"
+                       asp-action="Search"
+                       asp-all-route-data="@(new Dictionary<string, string?>
+                       {
+                           ["Hashtag"] = Model.Hashtag,
+                           ["Author"] = Model.Author,
+                           ["MinSizeKb"] = Model.MinSizeKb?.ToString(),
+                           ["MaxSizeKb"] = Model.MaxSizeKb?.ToString(),
+                           ["UploadedFrom"] = Model.UploadedFrom?.ToString("yyyy-MM-dd"),
+                           ["UploadedTo"] = Model.UploadedTo?.ToString("yyyy-MM-dd"),
+                           ["Page"] = (results.Page + 1).ToString()
+                       })">Next</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}

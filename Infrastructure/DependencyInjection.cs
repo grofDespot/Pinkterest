@@ -1,8 +1,10 @@
+using Amazon.S3;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Pinkterest.Application.Accounts;
 using Pinkterest.Application.Admin.Models;
 using Pinkterest.Application.Admin.Requests;
@@ -49,6 +51,7 @@ public static class DependencyInjection
 
         services.AddOptions<SeedOptions>().Bind(configuration.GetSection(SeedOptions.SectionName));
         services.AddOptions<StorageOptions>().Bind(configuration.GetSection(StorageOptions.SectionName));
+        services.AddOptions<S3StorageOptions>().Bind(configuration.GetSection(S3StorageOptions.SectionName));
         services.AddScoped<DatabaseSeeder>();
 
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -71,6 +74,24 @@ public static class DependencyInjection
         services.AddScoped<IUsageQuery, UsageQuery>();
 
         services.AddScoped<LocalFileSystemPhotoStorage>();
+        services.AddScoped<S3PhotoStorage>();
+        services.AddSingleton<IAmazonS3>(sp =>
+        {
+            var s3 = sp.GetRequiredService<IOptions<S3StorageOptions>>().Value;
+
+            var config = new AmazonS3Config
+            {
+                ForcePathStyle = s3.ForcePathStyle,
+                AuthenticationRegion = s3.Region
+            };
+
+            if (!string.IsNullOrWhiteSpace(s3.ServiceUrl))
+            {
+                config.ServiceURL = s3.ServiceUrl;
+            }
+
+            return new AmazonS3Client(s3.AccessKey, s3.SecretKey, config);
+        });
         services.AddScoped<IPhotoStorageFactory, PhotoStorageFactory>();
         services.AddScoped<IPhotoStorage>(sp => new CachingPhotoStorageProxy(
             sp.GetRequiredService<IPhotoStorageFactory>().Create(),

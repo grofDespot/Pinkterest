@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/IntegrationTests/IntegrationTests.csproj" Id="6a908162-e342-4be0-ae1c-8f74441aad58" />
+    <Project Path="tests/UiTests/UiTests.csproj" Id="2f9b346c-a2d4-4669-8808-fd0cbba61d11" />
+    <Project Path="tests/UnitTests/UnitTests.csproj" Id="20e803dc-1e07-402a-8c42-a9076d53039f" />
+  </Folder>
   <Project Path="App/App.csproj" />
   <Project Path="CrossCutting/CrossCutting.csproj" />
   <Project Path="Domain/Domain.csproj" />

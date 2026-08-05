@@ -1,0 +1,67 @@
+@model ChangePackageViewModel
+@{
+    ViewData["Title"] = "Change package";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <h1 class="h3 mb-1">Change package</h1>
+        <p class="text-body-secondary">
+            Currently on <span class="badge text-bg-secondary">@Model.CurrentPackageName</span>.
+            A change takes effect the following day, and you can request one change per day.
+        </p>
+
+        @if (Model.PendingPackageName is not null)
+        {
+            <div class="alert alert-info">
+                Already switching to <strong>@Model.PendingPackageName</strong>
+                on @Model.PendingEffectiveDate?.ToString("yyyy-MM-dd").
+            </div>
+        }
+
+        <form asp-action="ChangePackage" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none-when-empty"></div>
+
+            <div class="row g-3 mb-4">
+                @foreach (var package in Model.Packages)
+                {
+                    <div class="col-md-4">
+                        <div class="card h-100 @(package.Id == Model.CurrentPackageId ? "border-primary" : "")">
+                            <div class="card-body">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="TargetPackageId"
+                                           value="@package.Id" id="target-@package.Id"
+                                           disabled="@(package.Id == Model.CurrentPackageId)" />
+                                    <label class="form-check-label fw-semibold" for="target-@package.Id">
+                                        @package.Name
+                                    </label>
+                                </div>
+                                <p class="mb-1 mt-2">
+                                    @(package.MonthlyPrice == 0 ? "Free" : $"€{package.MonthlyPrice:0.00} / month")
+                                </p>
+                                <ul class="list-unstyled small text-body-secondary mb-0">
+                                    <li>Up to @ByteSize.Humanize(package.MaxUploadSizeBytes) per photo</li>
+                                    <li>@package.DailyUploadLimit uploads per day</li>
+                                    <li>@ByteSize.Humanize(package.MaxTotalStorageBytes) total storage</li>
+                                </ul>
+                                @if (package.Id == Model.CurrentPackageId)
+                                {
+                                    <span class="badge text-bg-primary mt-2">Current</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <span asp-validation-for="TargetPackageId" class="text-danger d-block mb-2"></span>
+
+            <button type="submit" class="btn btn-primary">Schedule change</button>
+            <a asp-action="Usage" class="btn btn-link">Back to usage</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,64 @@
+@model PhotoSearchResult
+@{
+    ViewData["Title"] = "Manage photos";
+}
+
+@if (TempData["AdminError"] is string adminError)
+{
+    <div class="alert alert-danger">@adminError</div>
+}
+
+<h1 class="h3 mb-3">Manage photos</h1>
+
+<form asp-action="Photos" method="get" class="row g-2 mb-4">
+    <div class="col-auto">
+        <input name="author" value="@ViewData["Author"]" class="form-control" placeholder="Author" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Filter</button>
+        <a asp-action="Photos" class="btn btn-link">Clear</a>
+    </div>
+</form>
+
+<p class="text-body-secondary">@Model.TotalCount photo(s) — page @Model.Page of @Math.Max(1, Model.TotalPages)</p>
+
+<div class="row g-3">
+    @foreach (var photo in Model.Photos)
+    {
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="card h-100">
+                <a asp-controller="Gallery" asp-action="Details" asp-route-id="@photo.Id">
+                    <img src="@Url.Action("Thumbnail", "Gallery", new { id = photo.Id })"
+                         class="card-img-top" alt="" loading="lazy" />
+                </a>
+                <div class="card-body">
+                    <p class="small mb-1">@photo.AuthorDisplayName</p>
+                    <p class="small text-body-secondary mb-2">
+                        @photo.UploadedUtc.ToLocalTime().ToString("yyyy-MM-dd") · @ByteSize.Humanize(photo.SizeBytes)
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a asp-controller="Gallery" asp-action="Edit" asp-route-id="@photo.Id"
+                           class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <form asp-action="DeletePhoto" asp-route-id="@photo.Id" method="post"
+                              onsubmit="return confirm('Delete this photo?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<nav class="mt-4">
+    <ul class="pagination">
+        <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+            <a class="page-link" asp-action="Photos" asp-route-page="@(Model.Page - 1)"
+               asp-route-author="@ViewData["Author"]">Previous</a>
+        </li>
+        <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+            <a class="page-link" asp-action="Photos" asp-route-page="@(Model.Page + 1)"
+               asp-route-author="@ViewData["Author"]">Next</a>
+        </li>
+    </ul>
+</nav>

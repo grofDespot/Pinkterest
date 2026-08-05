@@ -1,0 +1,50 @@
+@model IReadOnlyList<AdminUserSummary>
+@{
+    ViewData["Title"] = "Users";
+}
+
+<h1 class="h3 mb-3">Users</h1>
+
+<form asp-action="Users" method="get" class="row g-2 mb-4">
+    <div class="col-auto">
+        <input name="search" value="@ViewData["Search"]" class="form-control" placeholder="Name or email" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Search</button>
+        <a asp-action="Users" class="btn btn-link">Clear</a>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Name</th><th>Email</th><th>Package</th>
+                <th class="text-end">Photos</th><th class="text-end">Stored</th>
+                <th>Joined</th><th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>
+                    @user.DisplayName
+                    @if (user.IsLockedOut)
+                    {
+                        <span class="badge text-bg-warning ms-1">locked</span>
+                    }
+                </td>
+                <td class="text-body-secondary">@user.Email</td>
+                <td><span class="badge text-bg-secondary">@user.PackageName</span></td>
+                <td class="text-end">@user.PhotoCount</td>
+                <td class="text-end">@ByteSize.Humanize(user.BytesStored)</td>
+                <td class="text-body-secondary">@user.CreatedUtc.ToLocalTime().ToString("yyyy-MM-dd")</td>
+                <td class="text-end">
+                    <a asp-action="EditUser" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

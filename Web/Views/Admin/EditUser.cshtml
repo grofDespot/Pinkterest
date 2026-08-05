@@ -1,0 +1,65 @@
+@model EditUserViewModel
+@{
+    ViewData["Title"] = "Edit user";
+}
+
+<h1 class="h3 mb-4">Edit user</h1>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <form asp-action="EditUser" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none-when-empty"></div>
+
+            <div class="mb-3">
+                <label asp-for="DisplayName" class="form-label"></label>
+                <input asp-for="DisplayName" class="form-control" />
+                <span asp-validation-for="DisplayName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PackageId" class="form-label"></label>
+                <select asp-for="PackageId" class="form-select">
+                    @foreach (var package in Model.Packages)
+                    {
+                        <option value="@package.Id">@package.Name</option>
+                    }
+                </select>
+                <div class="form-text">Setting a package here applies immediately and clears any pending change.</div>
+            </div>
+
+            <div class="form-check mb-4">
+                <input asp-for="ClearLockout" class="form-check-input" />
+                <label asp-for="ClearLockout" class="form-check-label"></label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a asp-action="Users" class="btn btn-link">Cancel</a>
+        </form>
+    </div>
+
+    @if (Model.Detail is { } detail)
+    {
+        <div class="col-lg-6">
+            <div class="card"><div class="card-body">
+                <h2 class="h6">Account</h2>
+                <dl class="row small mb-0">
+                    <dt class="col-5">Email</dt><dd class="col-7">@detail.Email</dd>
+                    <dt class="col-5">Joined</dt><dd class="col-7">@detail.CreatedUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</dd>
+                    <dt class="col-5">Photos</dt><dd class="col-7">@detail.PhotoCount</dd>
+                    <dt class="col-5">Stored</dt><dd class="col-7">@ByteSize.Humanize(detail.BytesStored)</dd>
+                    <dt class="col-5">Current package</dt><dd class="col-7">@detail.PackageName</dd>
+                    @if (detail.PendingPackageName is not null)
+                    {
+                        <dt class="col-5">Pending</dt>
+                        <dd class="col-7">@detail.PendingPackageName on @detail.PendingPackageEffectiveDate?.ToString("yyyy-MM-dd")</dd>
+                    }
+                </dl>
+            </div></div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

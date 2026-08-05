@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Pinkterest.Application.Common.Events;
 using Pinkterest.Application.Common.Results;
 using Pinkterest.Application.Photos;
 using Pinkterest.Application.Photos.Processing;
 using Pinkterest.Application.Photos.Storage;
 using Pinkterest.Application.Photos.Validation;
 using Pinkterest.Domain.Entities;
+using Pinkterest.Domain.Events;
 using Pinkterest.Infrastructure.Persistence;
 
 namespace Pinkterest.Infrastructure.Photos;
@@ -14,6 +16,7 @@ public sealed class PhotoUploadService(
     ApplicationDbContext context,
     IPhotoStorage storage,
     IImageProcessor imageProcessor,
+    IDomainEventDispatcher dispatcher,
     TimeProvider timeProvider,
     ILogger<PhotoUploadService> logger) : IPhotoUploadService
 {
@@ -104,7 +107,11 @@ public sealed class PhotoUploadService(
 
             await context.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation("User {UserId} uploaded photo {PhotoId}.", user.Id, photo.Id);
+            await dispatcher.PublishAsync(
+                new PhotoUploadedEvent(
+                    photo.Id, user.Id, photo.OriginalFileName, photo.SizeBytes, photo.UploadedUtc),
+                cancellationToken);
+
             return Result.Success(photo.Id);
         }
     }

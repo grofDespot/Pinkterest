@@ -4,7 +4,14 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Pinkterest.Application.Accounts;
+using Pinkterest.Application.Admin.Models;
+using Pinkterest.Application.Admin.Requests;
+using Pinkterest.Application.Common.Auditing;
+using Pinkterest.Application.Common.Auditing.Handlers;
+using Pinkterest.Application.Common.Events;
 using Pinkterest.Application.Common.Interfaces;
+using Pinkterest.Application.Common.Mediation;
+using Pinkterest.Application.Common.Results;
 using Pinkterest.Application.Packages;
 using Pinkterest.Application.Photos;
 using Pinkterest.Application.Photos.Download;
@@ -13,7 +20,12 @@ using Pinkterest.Application.Photos.Search;
 using Pinkterest.Application.Photos.Storage;
 using Pinkterest.Application.Usage;
 using Pinkterest.Domain.Entities;
+using Pinkterest.Domain.Events;
+using Pinkterest.Infrastructure.Admin;
+using Pinkterest.Infrastructure.Auditing;
+using Pinkterest.Infrastructure.Events;
 using Pinkterest.Infrastructure.Identity;
+using Pinkterest.Infrastructure.Mediation;
 using Pinkterest.Infrastructure.Packages;
 using Pinkterest.Infrastructure.Persistence;
 using Pinkterest.Infrastructure.Persistence.Seeding;
@@ -69,6 +81,27 @@ public static class DependencyInjection
         services.AddScoped<IPhotoEditService, PhotoEditService>();
         services.AddScoped<IPhotoSearchService, PhotoSearchService>();
         services.AddScoped<IPhotoDownloadService, PhotoDownloadService>();
+
+        services.AddScoped<IAuditLog, AuditLog>();
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+        services.AddScoped<IDomainEventHandler<PhotoUploadedEvent>, AuditPhotoUploadedHandler>();
+        services.AddScoped<IDomainEventHandler<PhotoUploadedEvent>, LogPhotoUploadedHandler>();
+        services.AddScoped<IDomainEventHandler<PhotoDetailsUpdatedEvent>, AuditPhotoDetailsUpdatedHandler>();
+        services.AddScoped<IDomainEventHandler<UserRegisteredEvent>, AuditUserRegisteredHandler>();
+        services.AddScoped<IDomainEventHandler<PackageChangeRequestedEvent>, AuditPackageChangeRequestedHandler>();
+        services.AddScoped<IDomainEventHandler<PackageChangeAppliedEvent>, AuditPackageChangeAppliedHandler>();
+
+        services.AddScoped<ISender, Sender>();
+        services.AddScoped<IRequestHandler<GetAdminStatisticsQuery, AdminStatistics>, GetAdminStatisticsHandler>();
+        services.AddScoped<IRequestHandler<GetUsersQuery, IReadOnlyList<AdminUserSummary>>, GetUsersHandler>();
+        services.AddScoped<IRequestHandler<GetUserDetailQuery, AdminUserDetail?>, GetUserDetailHandler>();
+        services.AddScoped<IRequestHandler<UpdateUserCommand, Result>, UpdateUserHandler>();
+        services.AddScoped<IRequestHandler<GetAuditLogQuery, AuditLogPage>, GetAuditLogHandler>();
+        services.AddScoped<IRequestHandler<GetManagedPhotosQuery, PhotoSearchResult>, GetManagedPhotosHandler>();
+        services.AddScoped<IRequestHandler<DeletePhotoCommand, Result>, DeletePhotoHandler>();
+
+        services.AddScoped<IPackageChangeService, PackageChangeService>();
+        services.AddHostedService<PendingPackageChangeWorker>();
 
         return services;
     }

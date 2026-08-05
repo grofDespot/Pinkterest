@@ -2,9 +2,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Pinkterest.Application.Accounts;
+using Pinkterest.Application.Common.Auditing;
+using Pinkterest.Application.Common.Events;
 using Pinkterest.Application.Common.Results;
 using Pinkterest.Domain.Constants;
 using Pinkterest.Domain.Entities;
+using Pinkterest.Domain.Events;
 using Pinkterest.Infrastructure.Persistence;
 
 namespace Pinkterest.Infrastructure.Identity;
@@ -13,6 +16,8 @@ public sealed class AccountService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     ApplicationDbContext context,
+    IDomainEventDispatcher dispatcher,
+    IAuditLog auditLog,
     TimeProvider timeProvider,
     ILogger<AccountService> logger) : IAccountService
 {
@@ -47,6 +52,10 @@ public sealed class AccountService(
         await userManager.AddToRoleAsync(user, Roles.RegisteredUser);
         await signInManager.SignInAsync(user, isPersistent: false);
 
+        await dispatcher.PublishAsync(
+            new UserRegisteredEvent(user.Id, user.Email!, user.PackageId, timeProvider.GetUtcNow()),
+            cancellationToken);
+
         logger.LogInformation("Registered user {UserId}.", user.Id);
         return Result.Success(user.Id);
     }
@@ -57,6 +66,10 @@ public sealed class AccountService(
 
         if (user is null)
         {
+            await auditLog.RecordAsync(
+                new AuditEntry(AuditActions.LoginFailed, Succeeded: false, UserName: request.Email),
+                cancellationToken);
+
             return Result.Failure(AccountErrors.InvalidCredentials);
         }
 
@@ -66,13 +79,30 @@ public sealed class AccountService(
         if (attempt.IsLockedOut)
         {
             logger.LogWarning("Login blocked for locked out user {UserId}.", user.Id);
+
+            await auditLog.RecordAsync(
+                new AuditEntry(AuditActions.LoginFailed, Succeeded: false, UserId: user.Id, UserName: user.Email),
+                cancellationToken);
+
             return Result.Failure(AccountErrors.LockedOut);
         }
+
+        await auditLog.RecordAsync(
+            new AuditEntry(
+                attempt.Succeeded ? AuditActions.Login : AuditActions.LoginFailed,
+                Succeeded: attempt.Succeeded,
+                UserId: user.Id,
+                UserName: user.Email),
+            cancellationToken);
 
         return attempt.Succeeded
             ? Result.Success()
             : Result.Failure(AccountErrors.InvalidCredentials);
     }
 
-    public Task LogoutAsync() => signInManager.SignOutAsync();
+    public async Task LogoutAsync()
+    {
+        await auditLog.RecordAsync(new AuditEntry(AuditActions.Logout));
+        await signInManager.SignOutAsync();
+    }
 }

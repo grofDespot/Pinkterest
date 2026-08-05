@@ -11,6 +11,7 @@ namespace Pinkterest.Web.Controllers;
 public class AccountController(
     IAccountService accountService,
     IPackageCatalog packageCatalog,
+    IPackageChangeService packageChangeService,
     IUsageQuery usageQuery,
     ICurrentUser currentUser) : Controller
 {
@@ -105,8 +106,73 @@ public class AccountController(
     }
 
     [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> ChangePackage(CancellationToken cancellationToken)
+    {
+        if (currentUser.UserId is not { } userId)
+        {
+            return Forbid();
+        }
+
+        var usage = await usageQuery.GetForUserAsync(userId, cancellationToken);
+
+        if (usage.IsFailure)
+        {
+            return NotFound();
+        }
+
+        return View(await BuildChangePackageViewModelAsync(usage.Value, cancellationToken));
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> ChangePackage(ChangePackageViewModel model, CancellationToken cancellationToken)
+    {
+        if (currentUser.UserId is not { } userId)
+        {
+            return Forbid();
+        }
+
+        if (ModelState.IsValid)
+        {
+            var result = await packageChangeService.RequestChangeAsync(
+                userId, model.TargetPackageId, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                TempData["PackageChangeEffective"] = result.Value.EffectiveDate.ToString("yyyy-MM-dd");
+                return RedirectToAction(nameof(Usage));
+            }
+
+            ModelState.AddModelError(string.Empty, result.Error.Message);
+        }
+
+        var usage = await usageQuery.GetForUserAsync(userId, cancellationToken);
+
+        return usage.IsFailure
+            ? NotFound()
+            : View(await BuildChangePackageViewModelAsync(usage.Value, cancellationToken));
+    }
+
+    [HttpGet]
     [AllowAnonymous]
     public IActionResult AccessDenied() => View();
+
+    private async Task<ChangePackageViewModel> BuildChangePackageViewModelAsync(
+        UsageSummary usage,
+        CancellationToken cancellationToken)
+    {
+        var packages = await packageCatalog.GetAllAsync(cancellationToken);
+
+        return new ChangePackageViewModel
+        {
+            CurrentPackageName = usage.PackageName,
+            CurrentPackageId = packages.SingleOrDefault(p => p.Name == usage.PackageName)?.Id ?? Guid.Empty,
+            PendingPackageName = usage.PendingPackageName,
+            PendingEffectiveDate = usage.PendingPackageEffectiveDate,
+            Packages = packages
+        };
+    }
 
     private IActionResult RedirectToLocal(string? returnUrl) =>
         !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)

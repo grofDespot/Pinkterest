@@ -1,0 +1,108 @@
+@model AdminStatistics
+@{
+    ViewData["Title"] = "Admin";
+}
+
+@if (TempData["AdminError"] is string adminError)
+{
+    <div class="alert alert-danger">@adminError</div>
+}
+
+<h1 class="h3 mb-4">Administration</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card"><div class="card-body">
+            <p class="text-body-secondary small mb-1">Users</p>
+            <p class="h4 mb-0">@Model.UserCount</p>
+        </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card"><div class="card-body">
+            <p class="text-body-secondary small mb-1">Photos</p>
+            <p class="h4 mb-0">@Model.PhotoCount</p>
+        </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card"><div class="card-body">
+            <p class="text-body-secondary small mb-1">Stored</p>
+            <p class="h4 mb-0">@ByteSize.Humanize(Model.TotalBytesStored)</p>
+        </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card"><div class="card-body">
+            <p class="text-body-secondary small mb-1">Uploads today</p>
+            <p class="h4 mb-0">@Model.UploadsToday</p>
+        </div></div>
+    </div>
+</div>
+
+<div class="mb-4">
+    <a asp-action="Users" class="btn btn-outline-primary">Users</a>
+    <a asp-action="Photos" class="btn btn-outline-primary">Photos</a>
+    <a asp-action="AuditLog" class="btn btn-outline-primary">Audit log</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="h6">Users per package</h2>
+            <table class="table table-sm mb-0">
+                <tbody>
+                @foreach (var row in Model.PackageDistribution)
+                {
+                    <tr><td>@row.PackageName</td><td class="text-end">@row.UserCount</td></tr>
+                }
+                </tbody>
+            </table>
+        </div></div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="h6">Top uploaders</h2>
+            <table class="table table-sm mb-0">
+                <tbody>
+                @foreach (var row in Model.TopUploaders)
+                {
+                    <tr>
+                        <td>@row.DisplayName</td>
+                        <td class="text-end">@row.PhotoCount</td>
+                        <td class="text-end text-body-secondary">@ByteSize.Humanize(row.BytesStored)</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div></div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="h6">Uploads, last 14 days</h2>
+            @if (Model.RecentUploads.Count == 0)
+            {
+                <p class="text-body-secondary small mb-0">No uploads yet.</p>
+            }
+            else
+            {
+                var peak = Model.RecentUploads.Max(point => point.Uploads);
+                <table class="table table-sm mb-0">
+                    <tbody>
+                    @foreach (var point in Model.RecentUploads)
+                    {
+                        <tr>
+                            <td class="text-nowrap">@point.Date.ToString("MM-dd")</td>
+                            <td class="w-100">
+                                <div class="progress" style="height:.5rem">
+                                    <div class="progress-bar" style="width:@(point.Uploads * 100 / Math.Max(1, peak))%"></div>
+                                </div>
+                            </td>
+                            <td class="text-end">@point.Uploads</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div></div>
+    </div>
+</div>

@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Pinkterest.Application.Common.Events;
 using Pinkterest.Application.Common.Results;
 using Pinkterest.Application.Photos;
 using Pinkterest.Domain.Entities;
+using Pinkterest.Domain.Events;
 using Pinkterest.Infrastructure.Persistence;
 
 namespace Pinkterest.Infrastructure.Photos;
@@ -10,6 +12,8 @@ namespace Pinkterest.Infrastructure.Photos;
 public sealed class PhotoEditService(
     ApplicationDbContext context,
     IPhotoRepository repository,
+    IDomainEventDispatcher dispatcher,
+    TimeProvider timeProvider,
     ILogger<PhotoEditService> logger) : IPhotoEditService
 {
     public async Task<Result> UpdateDetailsAsync(
@@ -36,6 +40,10 @@ public sealed class PhotoEditService(
         photo.Description = description;
         await ReplaceHashtagsAsync(photo, hashtags, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
+
+        await dispatcher.PublishAsync(
+            new PhotoDetailsUpdatedEvent(photo.Id, editorId, editorIsAdministrator, timeProvider.GetUtcNow()),
+            cancellationToken);
 
         return Result.Success();
     }

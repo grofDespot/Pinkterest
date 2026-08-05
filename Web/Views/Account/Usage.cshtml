@@ -3,6 +3,11 @@
     ViewData["Title"] = "Your usage";
 }
 
+@if (TempData["PackageChangeEffective"] is string effective)
+{
+    <div class="alert alert-success">Package change scheduled for @effective.</div>
+}
+
 <h1 class="h3 mb-1">Your usage</h1>
 <p class="text-body-secondary">
     Current package: <span class="badge text-bg-secondary">@Model.PackageName</span>
@@ -15,6 +20,8 @@
         on @Model.PendingPackageEffectiveDate?.ToString("yyyy-MM-dd").
     </div>
 }
+
+<a asp-action="ChangePackage" class="btn btn-outline-primary btn-sm mb-2">Change package</a>
 
 <div class="row g-4 mt-1">
     <div class="col-md-6">

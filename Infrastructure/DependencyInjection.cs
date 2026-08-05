@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Pinkterest.Application.Accounts;
+using Pinkterest.Application.Accounts.External;
 using Pinkterest.Application.Admin.Models;
 using Pinkterest.Application.Admin.Requests;
 using Pinkterest.Application.Common.Auditing;
@@ -69,7 +70,10 @@ public static class DependencyInjection
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
+        services.AddExternalAuthentication(configuration);
+
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IExternalAuthenticationService, ExternalAuthenticationService>();
         services.AddScoped<IPackageCatalog, PackageCatalog>();
         services.AddScoped<IUsageQuery, UsageQuery>();
 
@@ -123,6 +127,42 @@ public static class DependencyInjection
 
         services.AddScoped<IPackageChangeService, PackageChangeService>();
         services.AddHostedService<PendingPackageChangeWorker>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddExternalAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var options = configuration
+            .GetSection(ExternalAuthenticationOptions.SectionName)
+            .Get<ExternalAuthenticationOptions>() ?? new ExternalAuthenticationOptions();
+
+        var builder = services.AddAuthentication();
+
+        if (options.Google.IsConfigured)
+        {
+            builder.AddGoogle(google =>
+            {
+                google.ClientId = options.Google.ClientId;
+                google.ClientSecret = options.Google.ClientSecret;
+                google.CallbackPath = "/signin-google";
+                google.SaveTokens = false;
+            });
+        }
+
+        if (options.GitHub.IsConfigured)
+        {
+            builder.AddGitHub(github =>
+            {
+                github.ClientId = options.GitHub.ClientId;
+                github.ClientSecret = options.GitHub.ClientSecret;
+                github.CallbackPath = "/signin-github";
+                github.Scope.Add("user:email");
+                github.SaveTokens = false;
+            });
+        }
 
         return services;
     }

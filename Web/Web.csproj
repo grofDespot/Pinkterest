@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -6,6 +6,7 @@
     <RootNamespace>Pinkterest.Web</RootNamespace>
     <AssemblyName>Pinkterest.Web</AssemblyName>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>e2b25a6e-f208-421d-a50b-2c220cdf4e04</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
 using Pinkterest.Application.Accounts;
+using Pinkterest.Application.Accounts.External;
 using Pinkterest.Application.Common.Interfaces;
 using Pinkterest.Application.Packages;
 using Pinkterest.Application.Usage;
@@ -10,6 +12,7 @@ namespace Pinkterest.Web.Controllers;
 
 public class AccountController(
     IAccountService accountService,
+    IExternalAuthenticationService externalAuthentication,
     IPackageCatalog packageCatalog,
     IPackageChangeService packageChangeService,
     IUsageQuery usageQuery,
@@ -52,13 +55,14 @@ public class AccountController(
 
     [HttpGet]
     [AllowAnonymous]
-    public IActionResult Login(string? returnUrl = null)
+    public async Task<IActionResult> Login(string? returnUrl = null)
     {
         if (currentUser.IsAuthenticated)
         {
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
+        ViewData["ExternalProviders"] = await externalAuthentication.GetProvidersAsync();
         return View(new LoginViewModel { ReturnUrl = returnUrl });
     }
 
@@ -68,6 +72,7 @@ public class AccountController(
     {
         if (!ModelState.IsValid)
         {
+            ViewData["ExternalProviders"] = await externalAuthentication.GetProvidersAsync();
             return View(model);
         }
 
@@ -77,10 +82,83 @@ public class AccountController(
         if (result.IsFailure)
         {
             ModelState.AddModelError(string.Empty, result.Error.Message);
+            ViewData["ExternalProviders"] = await externalAuthentication.GetProvidersAsync();
             return View(model);
         }
 
         return RedirectToLocal(model.ReturnUrl);
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public IActionResult ExternalLogin(string provider, string? returnUrl = null)
+    {
+        var callback = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+
+        var properties = new AuthenticationProperties { RedirectUri = callback };
+        properties.Items["LoginProvider"] = provider;
+
+        return Challenge(properties, provider);
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> ExternalLoginCallback(
+        string? returnUrl,
+        string? remoteError,
+        CancellationToken cancellationToken)
+    {
+        if (remoteError is not null)
+        {
+            TempData["ExternalError"] = $"The provider reported an error: {remoteError}";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var result = await externalAuthentication.TrySignInAsync(cancellationToken);
+
+        switch (result.Outcome)
+        {
+            case ExternalLoginOutcome.SignedIn:
+                return RedirectToLocal(returnUrl);
+
+            case ExternalLoginOutcome.RequiresRegistration:
+                return View(nameof(ExternalRegister), new ExternalRegisterViewModel
+                {
+                    Provider = result.Provider ?? string.Empty,
+                    DisplayName = result.SuggestedDisplayName ?? string.Empty,
+                    Email = result.Email ?? string.Empty,
+                    Packages = await packageCatalog.GetAllAsync(cancellationToken)
+                });
+
+            default:
+                TempData["ExternalError"] = result.Error?.Message ?? "External sign-in failed.";
+                return RedirectToAction(nameof(Login));
+        }
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> ExternalRegister(
+        ExternalRegisterViewModel model,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            model.Packages = await packageCatalog.GetAllAsync(cancellationToken);
+            return View(model);
+        }
+
+        var result = await externalAuthentication.CompleteRegistrationAsync(
+            model.DisplayName, model.Email, model.PackageId, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            ModelState.AddModelError(string.Empty, result.Error.Message);
+            model.Packages = await packageCatalog.GetAllAsync(cancellationToken);
+            return View(model);
+        }
+
+        return RedirectToAction(nameof(Usage));
     }
 
     [HttpPost]

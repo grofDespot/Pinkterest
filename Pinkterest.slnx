@@ -5,6 +5,7 @@
     <Project Path="tests/UnitTests/UnitTests.csproj" Id="20e803dc-1e07-402a-8c42-a9076d53039f" />
   </Folder>
   <Project Path="App/App.csproj" />
+  <Project Path="Benchmarks/Benchmarks.csproj" Id="c9adeaaf-4cd9-427c-8219-f22b574edaed" />
   <Project Path="CrossCutting/CrossCutting.csproj" />
   <Project Path="Domain/Domain.csproj" />
   <Project Path="Infrastructure/Infrastructure.csproj" />

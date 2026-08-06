@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8' />
-<title>Pinkterest.Benchmarks.SpecificationBenchmarks-20260806-212936</title>
+<title>Pinkterest.Benchmarks.SpecificationBenchmarks-20260806-233354</title>
 
 <style type="text/css">
 	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
@@ -16,14 +16,18 @@
 BenchmarkDotNet v0.15.8, Windows 11 (10.0.26100.1742/24H2/2024Update/HudsonValley)
 11th Gen Intel Core i7-11700K 3.60GHz, 1 CPU, 16 logical and 8 physical cores
 .NET SDK 10.0.302
-  [Host] : .NET 10.0.10 (10.0.10, 10.0.1026.32716), X64 RyuJIT x86-64-v4
+  [Host]     : .NET 10.0.10 (10.0.10, 10.0.1026.32716), X64 RyuJIT x86-64-v4
+  DefaultJob : .NET 10.0.10 (10.0.10, 10.0.1026.32716), X64 RyuJIT x86-64-v4
 </code></pre>
 <pre><code></code></pre>
 
 <table>
-<thead><tr><th>Method            </th><th>Mean</th><th>Error</th><th>Ratio</th><th>RatioSD</th><th>Alloc Ratio</th>
+<thead><tr><th>Method                                   </th><th>Mean   </th><th>Error </th><th>StdDev</th><th>Ratio</th><th>RatioSD</th><th>Gen0</th><th>Gen1</th><th>Allocated</th><th>Alloc Ratio</th>
 </tr>
-</thead><tbody><tr><td>&#39;Hand-written predicate&#39;</td><td>NA</td><td>NA</td><td>?</td><td>?</td><td>?</td>
+</thead><tbody><tr><td>&#39;Hand-written predicate&#39;</td><td>10.34 ns</td><td>0.111 ns</td><td>0.098 ns</td><td>1.00</td><td>0.01</td><td>-</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Specification compiled once, then invoked&#39;</td><td>348.13 ns</td><td>5.434 ns</td><td>4.817 ns</td><td>33.67</td><td>0.54</td><td>0.0114</td><td>-</td><td>96 B</td><td>NA</td>
+</tr><tr><td>&#39;Specification recompiled on every call&#39;</td><td>802,050.21 ns</td><td>6,427.820 ns</td><td>6,012.587 ns</td><td>77,564.01</td><td>901.72</td><td>1.9531</td><td>0.9766</td><td>23370 B</td><td>NA</td>
+</tr><tr><td>&#39;Compose four filters into one expression tree&#39;</td><td>7,510.01 ns</td><td>139.817 ns</td><td>213.515 ns</td><td>726.27</td><td>21.38</td><td>1.1597</td><td>-</td><td>9976 B</td><td>NA</td>
 </tr></tbody></table>
 </body>
 </html>

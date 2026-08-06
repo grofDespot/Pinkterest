@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Pinkterest.Benchmarks.ImageProcessingBenchmarks-20260806-232043</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.15.8, Windows 11 (10.0.26100.1742/24H2/2024Update/HudsonValley)
+11th Gen Intel Core i7-11700K 3.60GHz, 1 CPU, 16 logical and 8 physical cores
+.NET SDK 10.0.302
+  [Host]     : .NET 10.0.10 (10.0.10, 10.0.1026.32716), X64 RyuJIT x86-64-v4
+  DefaultJob : .NET 10.0.10 (10.0.10, 10.0.1026.32716), X64 RyuJIT x86-64-v4
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method                           </th><th>Mean      </th><th>Error   </th><th>StdDev  </th><th>Ratio</th><th>RatioSD</th><th>Gen0</th><th>Gen1</th><th>Gen2</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>&#39;Unchanged download: copy stored bytes&#39;</td><td>25.93 ns</td><td>0.528 ns</td><td>0.542 ns</td><td>1.00</td><td>0.03</td><td>0.0162</td><td>-</td><td>-</td><td>136 B</td><td>1.00</td>
+</tr><tr><td>&#39;Decode and re-encode, no filters&#39;</td><td>12,203,088.70 ns</td><td>78,003.578 ns</td><td>65,136.520 ns</td><td>470,863.03</td><td>9,929.37</td><td>109.3750</td><td>109.3750</td><td>109.3750</td><td>555520 B</td><td>4,084.71</td>
+</tr><tr><td>&#39;Resize to 800px&#39;</td><td>12,812,119.87 ns</td><td>163,162.312 ns</td><td>144,639.140 ns</td><td>494,362.84</td><td>11,456.14</td><td>31.2500</td><td>15.6250</td><td>15.6250</td><td>363492 B</td><td>2,672.74</td>
+</tr><tr><td>&#39;Resize plus sepia plus blur&#39;</td><td>15,781,636.46 ns</td><td>170,342.212 ns</td><td>159,338.211 ns</td><td>608,943.31</td><td>13,799.79</td><td>31.2500</td><td>-</td><td>-</td><td>384412 B</td><td>2,826.56</td>
+</tr><tr><td>&#39;Thumbnail at 400px&#39;</td><td>9,776,086.05 ns</td><td>138,673.878 ns</td><td>122,930.781 ns</td><td>377,215.77</td><td>8,971.31</td><td>15.6250</td><td>-</td><td>-</td><td>134424 B</td><td>988.41</td>
+</tr></tbody></table>
+</body>
+</html>

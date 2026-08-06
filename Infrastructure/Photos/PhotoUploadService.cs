@@ -10,6 +10,12 @@ using Pinkterest.Domain.Entities;
 using Pinkterest.Domain.Events;
 using Pinkterest.Infrastructure.Persistence;
 
+using Pinkterest.Application.Common.Auditing;
+
+using Pinkterest.CrossCutting.Auditing;
+
+using Pinkterest.CrossCutting.Metrics;
+
 namespace Pinkterest.Infrastructure.Photos;
 
 public sealed class PhotoUploadService(
@@ -22,6 +28,8 @@ public sealed class PhotoUploadService(
 {
     private const int ThumbnailMaxEdge = 400;
 
+    [Audited(AuditActions.PhotoUpload, EntityType = nameof(Photo))]
+    [Measured(AuditActions.PhotoUpload)]
     public async Task<Result<Guid>> UploadAsync(
         UploadPhotoRequest request,
         CancellationToken cancellationToken = default)

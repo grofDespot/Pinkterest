@@ -7,6 +7,12 @@ using Pinkterest.Application.Packages.State;
 using Pinkterest.Domain.Events;
 using Pinkterest.Infrastructure.Persistence;
 
+using Pinkterest.Application.Common.Auditing;
+
+using Pinkterest.CrossCutting.Auditing;
+
+using Pinkterest.CrossCutting.Metrics;
+
 namespace Pinkterest.Infrastructure.Packages;
 
 public sealed class PackageChangeService(
@@ -15,6 +21,8 @@ public sealed class PackageChangeService(
     TimeProvider timeProvider,
     ILogger<PackageChangeService> logger) : IPackageChangeService
 {
+    [Audited(AuditActions.PackageChangeRequested, EntityType = "ApplicationUser")]
+    [Measured(AuditActions.PackageChangeRequested)]
     public async Task<Result<PackageChangePlan>> RequestChangeAsync(
         Guid userId,
         Guid targetPackageId,
@@ -62,6 +70,7 @@ public sealed class PackageChangeService(
         return outcome;
     }
 
+    [Audited(AuditActions.PackageChangeApplied)]
     public async Task<int> ApplyDueChangesAsync(CancellationToken cancellationToken = default)
     {
         var today = DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime);

@@ -7,6 +7,10 @@ using Pinkterest.Domain.Entities;
 using Pinkterest.Domain.Events;
 using Pinkterest.Infrastructure.Persistence;
 
+using Pinkterest.Application.Common.Auditing;
+
+using Pinkterest.CrossCutting.Auditing;
+
 namespace Pinkterest.Infrastructure.Photos;
 
 public sealed class PhotoEditService(
@@ -16,6 +20,7 @@ public sealed class PhotoEditService(
     TimeProvider timeProvider,
     ILogger<PhotoEditService> logger) : IPhotoEditService
 {
+    [Audited(AuditActions.PhotoEdit, EntityType = nameof(Photo))]
     public async Task<Result> UpdateDetailsAsync(
         Guid photoId,
         Guid editorId,

@@ -10,6 +10,10 @@ using Pinkterest.Domain.Entities;
 using Pinkterest.Domain.Events;
 using Pinkterest.Infrastructure.Persistence;
 
+using Pinkterest.CrossCutting.Auditing;
+
+using Pinkterest.CrossCutting.Metrics;
+
 namespace Pinkterest.Infrastructure.Identity;
 
 public sealed class AccountService(
@@ -21,6 +25,8 @@ public sealed class AccountService(
     TimeProvider timeProvider,
     ILogger<AccountService> logger) : IAccountService
 {
+    [Audited(AuditActions.Register, EntityType = nameof(ApplicationUser))]
+    [Measured(AuditActions.Register)]
     public async Task<Result<Guid>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {
         var packageExists = await context.Packages
@@ -100,9 +106,6 @@ public sealed class AccountService(
             : Result.Failure(AccountErrors.InvalidCredentials);
     }
 
-    public async Task LogoutAsync()
-    {
-        await auditLog.RecordAsync(new AuditEntry(AuditActions.Logout));
-        await signInManager.SignOutAsync();
-    }
+    [Audited(AuditActions.Logout)]
+    public Task LogoutAsync() => signInManager.SignOutAsync();
 }

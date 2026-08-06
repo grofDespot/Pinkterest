@@ -1,9 +1,12 @@
+using Pinkterest.CrossCutting.Metrics;
+
 namespace Pinkterest.Application.Photos.Search;
 
 public sealed class PhotoSearchService(IPhotoRepository repository) : IPhotoSearchService
 {
     private const int MaxPageSize = 60;
 
+    [Measured("photo.search")]
     public async Task<PhotoSearchResult> SearchAsync(
         PhotoSearchQuery query,
         CancellationToken cancellationToken = default)

@@ -5,6 +5,12 @@ using Pinkterest.Application.Photos.Download;
 using Pinkterest.Application.Photos.Processing;
 using Pinkterest.Application.Photos.Storage;
 
+using Pinkterest.Application.Common.Auditing;
+
+using Pinkterest.CrossCutting.Auditing;
+
+using Pinkterest.CrossCutting.Metrics;
+
 namespace Pinkterest.Infrastructure.Photos;
 
 public sealed class PhotoDownloadService(
@@ -13,6 +19,8 @@ public sealed class PhotoDownloadService(
     IImageProcessor imageProcessor,
     ILogger<PhotoDownloadService> logger) : IPhotoDownloadService
 {
+    [Audited(AuditActions.PhotoDownload, EntityType = "Photo")]
+    [Measured(AuditActions.PhotoDownload)]
     public async Task<Result<PhotoDownload>> PrepareAsync(
         Guid photoId,
         ImageProcessingOptions options,

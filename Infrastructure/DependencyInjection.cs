@@ -1,4 +1,5 @@
 using Amazon.S3;
+using Castle.DynamicProxy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -10,7 +11,6 @@ using Pinkterest.Application.Accounts.External;
 using Pinkterest.Application.Admin.Models;
 using Pinkterest.Application.Admin.Requests;
 using Pinkterest.Application.Common.Auditing;
-using Pinkterest.Application.Common.Auditing.Handlers;
 using Pinkterest.Application.Common.Events;
 using Pinkterest.Application.Common.Interfaces;
 using Pinkterest.Application.Common.Mediation;
@@ -28,6 +28,7 @@ using Pinkterest.Infrastructure.Admin;
 using Pinkterest.Infrastructure.Auditing;
 using Pinkterest.Infrastructure.Events;
 using Pinkterest.Infrastructure.Identity;
+using Pinkterest.Infrastructure.Interception;
 using Pinkterest.Infrastructure.Mediation;
 using Pinkterest.Infrastructure.Packages;
 using Pinkterest.Infrastructure.Persistence;
@@ -72,7 +73,10 @@ public static class DependencyInjection
 
         services.AddExternalAuthentication(configuration);
 
-        services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IAsyncInterceptor, AuditInterceptor>();
+        services.AddScoped<IAsyncInterceptor, MetricsInterceptor>();
+
+        services.AddInterceptedScoped<IAccountService, AccountService>();
         services.AddScoped<IExternalAuthenticationService, ExternalAuthenticationService>();
         services.AddScoped<IPackageCatalog, PackageCatalog>();
         services.AddScoped<IUsageQuery, UsageQuery>();
@@ -101,20 +105,16 @@ public static class DependencyInjection
             sp.GetRequiredService<IPhotoStorageFactory>().Create(),
             sp.GetRequiredService<IMemoryCache>()));
         services.AddSingleton<IImageProcessor, ImageProcessor>();
-        services.AddScoped<IPhotoUploadService, PhotoUploadService>();
+        services.AddInterceptedScoped<IPhotoUploadService, PhotoUploadService>();
         services.AddScoped<IPhotoRepository, PhotoRepository>();
-        services.AddScoped<IPhotoEditService, PhotoEditService>();
-        services.AddScoped<IPhotoSearchService, PhotoSearchService>();
-        services.AddScoped<IPhotoDownloadService, PhotoDownloadService>();
+        services.AddInterceptedScoped<IPhotoEditService, PhotoEditService>();
+        services.AddInterceptedScoped<IPhotoSearchService, PhotoSearchService>();
+        services.AddInterceptedScoped<IPhotoDownloadService, PhotoDownloadService>();
 
         services.AddScoped<IAuditLog, AuditLog>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
-        services.AddScoped<IDomainEventHandler<PhotoUploadedEvent>, AuditPhotoUploadedHandler>();
         services.AddScoped<IDomainEventHandler<PhotoUploadedEvent>, LogPhotoUploadedHandler>();
-        services.AddScoped<IDomainEventHandler<PhotoDetailsUpdatedEvent>, AuditPhotoDetailsUpdatedHandler>();
-        services.AddScoped<IDomainEventHandler<UserRegisteredEvent>, AuditUserRegisteredHandler>();
-        services.AddScoped<IDomainEventHandler<PackageChangeRequestedEvent>, AuditPackageChangeRequestedHandler>();
-        services.AddScoped<IDomainEventHandler<PackageChangeAppliedEvent>, AuditPackageChangeAppliedHandler>();
+        services.AddScoped<IDomainEventHandler<PhotoUploadedEvent>, PhotoUploadMetricsHandler>();
 
         services.AddScoped<ISender, Sender>();
         services.AddScoped<IRequestHandler<GetAdminStatisticsQuery, AdminStatistics>, GetAdminStatisticsHandler>();
@@ -125,7 +125,7 @@ public static class DependencyInjection
         services.AddScoped<IRequestHandler<GetManagedPhotosQuery, PhotoSearchResult>, GetManagedPhotosHandler>();
         services.AddScoped<IRequestHandler<DeletePhotoCommand, Result>, DeletePhotoHandler>();
 
-        services.AddScoped<IPackageChangeService, PackageChangeService>();
+        services.AddInterceptedScoped<IPackageChangeService, PackageChangeService>();
         services.AddHostedService<PendingPackageChangeWorker>();
 
         return services;

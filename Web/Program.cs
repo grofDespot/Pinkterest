@@ -3,11 +3,13 @@ using Pinkterest.Application.Common.Interfaces;
 using Pinkterest.Domain.Constants;
 using Pinkterest.Infrastructure;
 using Pinkterest.Infrastructure.Persistence.Seeding;
+using Pinkterest.Web.Observability;
 using Pinkterest.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddPinkterestObservability();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
@@ -47,11 +49,15 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+if (builder.Configuration.GetValue("Https:Redirect", true))
+{
+    app.UseHttpsRedirection();
+}
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapPrometheusScrapingEndpoint();
 app.MapStaticAssets();
 
 app.MapControllerRoute(

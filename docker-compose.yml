@@ -47,6 +47,33 @@ services:
       echo 'bucket ready'
       "
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pinkterest-app
+    profiles: ["full"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Https__Redirect: "false"
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=pinkterest;Username=pinkterest;Password=pinkterest"
+      Storage__Provider: "S3"
+      Storage__LocalRootPath: "/tmp/pinkterest-storage"
+      Storage__S3__BucketName: "pinkterest-photos"
+      Storage__S3__ServiceUrl: "http://minio:9000"
+      Storage__S3__AccessKey: "pinkterest"
+      Storage__S3__SecretKey: "pinkterest123"
+      Storage__S3__ForcePathStyle: "true"
+      Seed__AdministratorEmail: "admin@pinkterest.local"
+      Seed__AdministratorPassword: "Dev!Administrator#2026"
+    ports:
+      - "8080:8080"
+
 volumes:
   pinkterest-pgdata:
   pinkterest-minio:

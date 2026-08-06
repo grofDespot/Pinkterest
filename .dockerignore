@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+**/.vs/
+**/storage/
+**/uploads/
+tests/
+docs/
+*.md
+*.pdf
+.git/
+.gitignore
+docker-compose*.yml
+Dockerfile

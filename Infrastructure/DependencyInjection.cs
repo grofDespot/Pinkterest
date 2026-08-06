@@ -30,6 +30,7 @@ using Pinkterest.Infrastructure.Events;
 using Pinkterest.Infrastructure.Identity;
 using Pinkterest.Infrastructure.Interception;
 using Pinkterest.Infrastructure.Mediation;
+using Pinkterest.Infrastructure.Observability;
 using Pinkterest.Infrastructure.Packages;
 using Pinkterest.Infrastructure.Persistence;
 using Pinkterest.Infrastructure.Persistence.Seeding;
@@ -126,6 +127,8 @@ public static class DependencyInjection
         services.AddScoped<IRequestHandler<DeletePhotoCommand, Result>, DeletePhotoHandler>();
 
         services.AddInterceptedScoped<IPackageChangeService, PackageChangeService>();
+        services.AddSingleton<StorageMetrics>();
+        services.AddHostedService<StorageMetricsInitializer>();
         services.AddHostedService<PendingPackageChangeWorker>();
 
         return services;

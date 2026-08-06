@@ -1,13 +1,13 @@
 using System.Diagnostics.Metrics;
 using Pinkterest.Application.Common.Events;
 using Pinkterest.Domain.Events;
-using Pinkterest.Infrastructure.Interception;
+using Pinkterest.Infrastructure.Observability;
 
 namespace Pinkterest.Infrastructure.Events;
 
 public sealed class PhotoUploadMetricsHandler : IDomainEventHandler<PhotoUploadedEvent>
 {
-    private static readonly Meter Meter = new(MetricsInterceptor.MeterName, "1.0.0");
+    private static readonly Meter Meter = new(PinkterestMeter.Name, PinkterestMeter.Version);
 
     private static readonly Counter<long> PhotosUploaded = Meter.CreateCounter<long>(
         "pinkterest.photos.uploaded", "photos", "Photos successfully stored.");

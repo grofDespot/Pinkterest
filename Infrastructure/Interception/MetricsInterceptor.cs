@@ -2,14 +2,13 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using Castle.DynamicProxy;
 using Pinkterest.CrossCutting.Metrics;
+using Pinkterest.Infrastructure.Observability;
 
 namespace Pinkterest.Infrastructure.Interception;
 
 public sealed class MetricsInterceptor : AsyncInterceptorBase
 {
-    public const string MeterName = "Pinkterest";
-
-    private static readonly Meter Meter = new(MeterName, "1.0.0");
+    private static readonly Meter Meter = new(PinkterestMeter.Name, PinkterestMeter.Version);
 
     private static readonly Histogram<double> OperationDuration = Meter.CreateHistogram<double>(
         "pinkterest.operation.duration", "ms", "How long an audited business operation takes.");

@@ -12,7 +12,6 @@ using Pinkterest.Web.Models.Photos;
 
 namespace Pinkterest.Web.Controllers;
 
-[AllowAnonymous]
 public class GalleryController(
     IPhotoRepository repository,
     IPhotoEditService editService,
@@ -24,6 +23,7 @@ public class GalleryController(
     private const int DefaultPageSize = 10;
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var photos = await repository.ListAsync(
@@ -33,6 +33,7 @@ public class GalleryController(
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Details(Guid id, CancellationToken cancellationToken)
     {
         var photo = await repository.GetDetailAsync(id, cancellationToken);
@@ -41,6 +42,7 @@ public class GalleryController(
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Search(PhotoSearchViewModel model, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
@@ -53,6 +55,7 @@ public class GalleryController(
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Download(
         Guid id,
         DownloadOptionsViewModel options,
@@ -70,10 +73,12 @@ public class GalleryController(
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public Task<IActionResult> Thumbnail(Guid id, CancellationToken cancellationToken) =>
         StreamAsync(id, thumbnail: true, download: false, cancellationToken);
 
     [HttpGet]
+    [AllowAnonymous]
     public Task<IActionResult> Raw(Guid id, CancellationToken cancellationToken) =>
         StreamAsync(id, thumbnail: false, download: false, cancellationToken);
 

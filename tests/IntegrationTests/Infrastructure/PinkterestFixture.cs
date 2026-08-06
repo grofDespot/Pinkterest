@@ -54,7 +54,12 @@ public sealed class PinkterestFixture : IAsyncLifetime
         Factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = followRedirects,
-            HandleCookies = true
+            HandleCookies = true,
+
+            // The Identity cookie is issued with SecurePolicy.Always, so the client
+            // discards it over plain http. TestServer honours an https base address
+            // without real TLS, which keeps the production cookie policy under test.
+            BaseAddress = new Uri("https://localhost")
         });
 
     public async Task<T> UseDbContextAsync<T>(Func<ApplicationDbContext, Task<T>> work)

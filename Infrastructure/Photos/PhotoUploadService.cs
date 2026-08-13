@@ -1,20 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Pinkterest.Application.Common.Auditing;
 using Pinkterest.Application.Common.Events;
 using Pinkterest.Application.Common.Results;
 using Pinkterest.Application.Photos;
 using Pinkterest.Application.Photos.Processing;
 using Pinkterest.Application.Photos.Storage;
 using Pinkterest.Application.Photos.Validation;
+using Pinkterest.CrossCutting.Auditing;
+using Pinkterest.CrossCutting.Metrics;
 using Pinkterest.Domain.Entities;
 using Pinkterest.Domain.Events;
 using Pinkterest.Infrastructure.Persistence;
-
-using Pinkterest.Application.Common.Auditing;
-
-using Pinkterest.CrossCutting.Auditing;
-
-using Pinkterest.CrossCutting.Metrics;
+using SixLabors.ImageSharp;
 
 namespace Pinkterest.Infrastructure.Photos;
 
@@ -81,7 +79,7 @@ public sealed class PhotoUploadService(
                 new ImageProcessingOptions(ImageOutputFormat.Jpeg, ThumbnailMaxEdge, ThumbnailMaxEdge, []),
                 cancellationToken);
         }
-        catch (Exception exception)
+        catch (Exception exception) when (exception is ImageFormatException or NotSupportedException)
         {
             logger.LogWarning(exception, "Rejected an upload that could not be decoded as an image.");
             return Result.Failure<Guid>(PhotoErrors.NotAnImage);

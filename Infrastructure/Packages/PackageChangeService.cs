@@ -1,17 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Pinkterest.Application.Common.Auditing;
 using Pinkterest.Application.Common.Events;
 using Pinkterest.Application.Common.Results;
 using Pinkterest.Application.Packages;
 using Pinkterest.Application.Packages.State;
+using Pinkterest.CrossCutting.Auditing;
+using Pinkterest.CrossCutting.Metrics;
 using Pinkterest.Domain.Events;
 using Pinkterest.Infrastructure.Persistence;
-
-using Pinkterest.Application.Common.Auditing;
-
-using Pinkterest.CrossCutting.Auditing;
-
-using Pinkterest.CrossCutting.Metrics;
 
 namespace Pinkterest.Infrastructure.Packages;
 

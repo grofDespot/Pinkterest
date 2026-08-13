@@ -8,6 +8,7 @@ using Pinkterest.Application.Common.Auditing;
 using Pinkterest.Application.Common.Events;
 using Pinkterest.Application.Common.Results;
 using Pinkterest.Application.Packages;
+using Pinkterest.CrossCutting.Auditing;
 using Pinkterest.Domain.Constants;
 using Pinkterest.Domain.Entities;
 using Pinkterest.Domain.Events;
@@ -71,6 +72,7 @@ public sealed class ExternalAuthenticationService(
             ExternalLoginOutcome.RequiresRegistration, info.LoginProvider, email, displayName);
     }
 
+    [Audited(AuditActions.Register, EntityType = nameof(ApplicationUser))]
     public async Task<Result<Guid>> CompleteRegistrationAsync(
         string displayName,
         string email,

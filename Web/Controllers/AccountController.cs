@@ -1,6 +1,6 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authentication;
 using Pinkterest.Application.Accounts;
 using Pinkterest.Application.Accounts.External;
 using Pinkterest.Application.Common.Interfaces;

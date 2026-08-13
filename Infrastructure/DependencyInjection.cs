@@ -78,7 +78,7 @@ public static class DependencyInjection
         services.AddScoped<IAsyncInterceptor, MetricsInterceptor>();
 
         services.AddInterceptedScoped<IAccountService, AccountService>();
-        services.AddScoped<IExternalAuthenticationService, ExternalAuthenticationService>();
+        services.AddInterceptedScoped<IExternalAuthenticationService, ExternalAuthenticationService>();
         services.AddScoped<IPackageCatalog, PackageCatalog>();
         services.AddScoped<IUsageQuery, UsageQuery>();
 

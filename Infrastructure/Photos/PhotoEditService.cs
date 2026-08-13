@@ -1,15 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Pinkterest.Application.Common.Auditing;
 using Pinkterest.Application.Common.Events;
 using Pinkterest.Application.Common.Results;
 using Pinkterest.Application.Photos;
+using Pinkterest.CrossCutting.Auditing;
 using Pinkterest.Domain.Entities;
 using Pinkterest.Domain.Events;
 using Pinkterest.Infrastructure.Persistence;
-
-using Pinkterest.Application.Common.Auditing;
-
-using Pinkterest.CrossCutting.Auditing;
 
 namespace Pinkterest.Infrastructure.Photos;
 

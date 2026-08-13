@@ -1,10 +1,10 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Pinkterest.Application.Common.Results;
 using Pinkterest.Application.Packages;
 using Pinkterest.Domain.Enums;
 using Pinkterest.IntegrationTests.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Pinkterest.IntegrationTests;

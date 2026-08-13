@@ -1,14 +1,11 @@
 using Microsoft.Extensions.Logging;
+using Pinkterest.Application.Common.Auditing;
 using Pinkterest.Application.Common.Results;
 using Pinkterest.Application.Photos;
 using Pinkterest.Application.Photos.Download;
 using Pinkterest.Application.Photos.Processing;
 using Pinkterest.Application.Photos.Storage;
-
-using Pinkterest.Application.Common.Auditing;
-
 using Pinkterest.CrossCutting.Auditing;
-
 using Pinkterest.CrossCutting.Metrics;
 
 namespace Pinkterest.Infrastructure.Photos;

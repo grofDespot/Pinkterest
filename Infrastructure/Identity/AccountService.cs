@@ -5,14 +5,12 @@ using Pinkterest.Application.Accounts;
 using Pinkterest.Application.Common.Auditing;
 using Pinkterest.Application.Common.Events;
 using Pinkterest.Application.Common.Results;
+using Pinkterest.CrossCutting.Auditing;
+using Pinkterest.CrossCutting.Metrics;
 using Pinkterest.Domain.Constants;
 using Pinkterest.Domain.Entities;
 using Pinkterest.Domain.Events;
 using Pinkterest.Infrastructure.Persistence;
-
-using Pinkterest.CrossCutting.Auditing;
-
-using Pinkterest.CrossCutting.Metrics;
 
 namespace Pinkterest.Infrastructure.Identity;
 

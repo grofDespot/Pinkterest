@@ -1,0 +1,51 @@
+@model PresetListViewModel
+@{
+    ViewData["Title"] = "Filter presets";
+}
+
+<h1 class="h3 mb-1">Filter presets</h1>
+<p class="text-body-secondary">
+    Saved combinations of format, size and filters. Pick one when downloading a photo
+    instead of setting the options again.
+</p>
+
+@if (TempData["PresetError"] is string presetError)
+{
+    <div class="alert alert-danger">@presetError</div>
+}
+
+@if (Model.Presets.Count == 0)
+{
+    <div class="alert alert-secondary">
+        You have no presets yet. Open any photo, set the download options you want,
+        and save them from the download panel.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr><th>Name</th><th>Settings</th><th>Created</th><th></th></tr>
+            </thead>
+            <tbody>
+            @foreach (var preset in Model.Presets)
+            {
+                <tr>
+                    <td class="fw-semibold">@preset.Name</td>
+                    <td class="text-body-secondary small">@preset.Summary</td>
+                    <td class="text-body-secondary small">@preset.CreatedUtc.ToLocalTime().ToString("yyyy-MM-dd")</td>
+                    <td class="text-end">
+                        <form asp-action="DeletePreset" asp-route-id="@preset.Id" method="post"
+                              onsubmit="return confirm('Delete this preset?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+<a asp-controller="Gallery" asp-action="Index" class="btn btn-link">Back to the gallery</a>

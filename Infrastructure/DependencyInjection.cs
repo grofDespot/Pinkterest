@@ -18,6 +18,7 @@ using Pinkterest.Application.Common.Results;
 using Pinkterest.Application.Packages;
 using Pinkterest.Application.Photos;
 using Pinkterest.Application.Photos.Download;
+using Pinkterest.Application.Photos.Presets;
 using Pinkterest.Application.Photos.Processing;
 using Pinkterest.Application.Photos.Search;
 using Pinkterest.Application.Photos.Storage;
@@ -111,6 +112,7 @@ public static class DependencyInjection
         services.AddInterceptedScoped<IPhotoEditService, PhotoEditService>();
         services.AddInterceptedScoped<IPhotoSearchService, PhotoSearchService>();
         services.AddInterceptedScoped<IPhotoDownloadService, PhotoDownloadService>();
+        services.AddInterceptedScoped<IFilterPresetService, FilterPresetService>();
 
         services.AddScoped<IAuditLog, AuditLog>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();

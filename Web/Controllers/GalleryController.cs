@@ -5,6 +5,7 @@ using Pinkterest.Application.Common.Interfaces;
 using Pinkterest.Application.Common.Specifications;
 using Pinkterest.Application.Photos;
 using Pinkterest.Application.Photos.Download;
+using Pinkterest.Application.Photos.Presets;
 using Pinkterest.Application.Photos.Search;
 using Pinkterest.Application.Photos.Storage;
 using Pinkterest.Domain.Constants;
@@ -18,6 +19,7 @@ public class GalleryController(
     IPhotoEditService editService,
     IPhotoSearchService searchService,
     IPhotoDownloadService downloadService,
+    IFilterPresetService presetService,
     IPhotoStorage storage,
     IAuditLog auditLog,
     ICurrentUser currentUser) : Controller
@@ -48,6 +50,11 @@ public class GalleryController(
         await auditLog.RecordAsync(
             new AuditEntry(AuditActions.PhotoView, nameof(Photo), id.ToString()),
             cancellationToken);
+
+        if (currentUser.UserId is { } viewerId)
+        {
+            ViewData["Presets"] = await presetService.ListAsync(viewerId, cancellationToken);
+        }
 
         return View(photo);
     }
@@ -86,9 +93,24 @@ public class GalleryController(
     public async Task<IActionResult> Download(
         Guid id,
         DownloadOptionsViewModel options,
+        Guid? presetId,
         CancellationToken cancellationToken)
     {
-        var result = await downloadService.PrepareAsync(id, options.ToProcessingOptions(), cancellationToken);
+        var processing = options.ToProcessingOptions();
+
+        if (presetId is { } preset && currentUser.UserId is { } userId)
+        {
+            var saved = await presetService.GetOptionsAsync(preset, userId, cancellationToken);
+
+            if (saved.IsFailure)
+            {
+                return NotFound();
+            }
+
+            processing = saved.Value;
+        }
+
+        var result = await downloadService.PrepareAsync(id, processing, cancellationToken);
 
         if (result.IsFailure)
         {

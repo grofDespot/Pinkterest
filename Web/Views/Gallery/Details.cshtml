@@ -1,6 +1,7 @@
 @model PhotoDetail
 @{
     ViewData["Title"] = "Photo";
+    var presets = ViewData["Presets"] as IReadOnlyList<FilterPresetDto> ?? [];
     var canEdit = User.Identity?.IsAuthenticated == true &&
                   (User.IsInRole(Roles.Administrator) ||
                    User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.OwnerId.ToString());
@@ -41,6 +42,35 @@
             Download original
         </a>
 
+        @if (TempData["PresetSaved"] is string savedPreset)
+        {
+            <div class="alert alert-success py-2 small">Saved preset &ldquo;@savedPreset&rdquo;.</div>
+        }
+        @if (TempData["PresetError"] is string presetError)
+        {
+            <div class="alert alert-danger py-2 small">@presetError</div>
+        }
+
+        @if (presets.Count > 0)
+        {
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h2 class="h6">Download with a saved preset</h2>
+                    <form asp-action="Download" method="get" class="d-flex gap-2">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <select name="presetId" class="form-select form-select-sm">
+                            @foreach (var preset in presets)
+                            {
+                                <option value="@preset.Id">@preset.Name — @preset.Summary</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary text-nowrap">Download</button>
+                    </form>
+                    <a asp-controller="Photos" asp-action="Presets" class="small">Manage presets</a>
+                </div>
+            </div>
+        }
+
         <div class="card">
             <div class="card-body">
                 <h2 class="h6">Download with filters</h2>
@@ -78,6 +108,25 @@
 
                     <button type="submit" class="btn btn-outline-primary btn-sm w-100">Download</button>
                 </form>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <hr class="my-3" />
+                    <form asp-controller="Photos" asp-action="SavePreset" method="post">
+                        <input type="hidden" name="PhotoId" value="@Model.Id" />
+                        <input type="hidden" name="Format" id="preset-format" />
+                        <input type="hidden" name="MaxWidth" id="preset-width" />
+                        <input type="hidden" name="MaxHeight" id="preset-height" />
+                        <div id="preset-filters"></div>
+
+                        <label for="preset-name" class="form-label small">Save these settings as</label>
+                        <div class="d-flex gap-2">
+                            <input name="Name" id="preset-name" class="form-control form-control-sm"
+                                   placeholder="web thumbnail" maxlength="64" />
+                            <button type="submit" class="btn btn-sm btn-outline-secondary text-nowrap">Save</button>
+                        </div>
+                    </form>
+                }
             </div>
         </div>
 
@@ -88,3 +137,26 @@
         <a asp-action="Index" class="btn btn-link mt-3">Back to gallery</a>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Mirror the download form's current settings into the save-preset form,
+        // so a preset stores exactly what the user is about to download.
+        document.querySelector('#preset-name')?.form?.addEventListener('submit', () => {
+            document.querySelector('#preset-format').value = document.querySelector('#Format').value;
+            document.querySelector('#preset-width').value = document.querySelector('#MaxWidth').value;
+            document.querySelector('#preset-height').value = document.querySelector('#MaxHeight').value;
+
+            const target = document.querySelector('#preset-filters');
+            target.innerHTML = '';
+
+            document.querySelectorAll('input[name="Filters"]:checked').forEach(checked => {
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'Filters';
+                hidden.value = checked.value;
+                target.appendChild(hidden);
+            });
+        });
+    </script>
+}

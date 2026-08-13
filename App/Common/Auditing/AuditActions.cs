@@ -9,6 +9,8 @@ public static class AuditActions
     public const string PhotoUpload = "photo.upload";
     public const string PhotoEdit = "photo.edit";
     public const string PhotoDownload = "photo.download";
+    public const string PhotoView = "photo.view";
+    public const string PhotoSearch = "photo.search";
     public const string PackageChangeRequested = "package.change.requested";
     public const string PackageChangeApplied = "package.change.applied";
 }

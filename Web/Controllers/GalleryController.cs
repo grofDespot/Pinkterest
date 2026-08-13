@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Pinkterest.Application.Common.Auditing;
 using Pinkterest.Application.Common.Interfaces;
 using Pinkterest.Application.Common.Specifications;
 using Pinkterest.Application.Photos;
@@ -18,6 +19,7 @@ public class GalleryController(
     IPhotoSearchService searchService,
     IPhotoDownloadService downloadService,
     IPhotoStorage storage,
+    IAuditLog auditLog,
     ICurrentUser currentUser) : Controller
 {
     private const int DefaultPageSize = 10;
@@ -38,7 +40,16 @@ public class GalleryController(
     {
         var photo = await repository.GetDetailAsync(id, cancellationToken);
 
-        return photo is null ? NotFound() : View(photo);
+        if (photo is null)
+        {
+            return NotFound();
+        }
+
+        await auditLog.RecordAsync(
+            new AuditEntry(AuditActions.PhotoView, nameof(Photo), id.ToString()),
+            cancellationToken);
+
+        return View(photo);
     }
 
     [HttpGet]
@@ -51,6 +62,22 @@ public class GalleryController(
         }
 
         model.Results = await searchService.SearchAsync(model.ToQuery(), cancellationToken);
+
+        await auditLog.RecordAsync(
+            new AuditEntry(
+                AuditActions.PhotoSearch,
+                Details: new
+                {
+                    model.Hashtag,
+                    model.Author,
+                    model.MinSizeKb,
+                    model.MaxSizeKb,
+                    model.UploadedFrom,
+                    model.UploadedTo,
+                    Matches = model.Results.TotalCount
+                }),
+            cancellationToken);
+
         return View(model);
     }
 

@@ -60,7 +60,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapPrometheusScrapingEndpoint();
+app.MapPrometheusScrapingEndpoint().RequireAuthorization(Policies.IsAdministrator);
 app.MapStaticAssets();
 
 app.MapControllerRoute(

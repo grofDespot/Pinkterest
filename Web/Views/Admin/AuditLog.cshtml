@@ -33,7 +33,7 @@
                 <td>@entry.UserName</td>
                 <td><code>@entry.Action</code></td>
                 <td class="small text-body-secondary">@entry.EntityType @entry.EntityId</td>
-                <td class="small text-body-secondary">@entry.IpAddress</td>
+                <td class="small text-body-secondary">@ClientAddress.ForDisplay(entry.IpAddress)</td>
                 <td>
                     @if (entry.Succeeded)
                     {

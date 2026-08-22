@@ -64,6 +64,13 @@ public sealed class S3PhotoStorage(IAmazonS3 client, IOptions<S3StorageOptions> 
             throw new ArgumentException("A storage key is required.", nameof(key));
         }
 
-        return key.Replace('\\', '/').TrimStart('/');
+        var normalized = key.Replace('\\', '/').TrimStart('/');
+
+        if (normalized.Split('/').Any(segment => segment is ".." or "."))
+        {
+            throw new InvalidOperationException("The storage key resolves outside the storage root.");
+        }
+
+        return normalized;
     }
 }

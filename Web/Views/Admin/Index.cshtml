@@ -86,15 +86,23 @@
             else
             {
                 var peak = Model.RecentUploads.Max(point => point.Uploads);
+                <style nonce="@Context.CspNonce()">
+                    .upload-spark { height: .5rem; }
+                    @for (var index = 0; index < Model.RecentUploads.Count; index++)
+                    {
+                        @:#upload-bar-@index { width: @(Model.RecentUploads[index].Uploads * 100 / Math.Max(1, peak))%; }
+                    }
+                </style>
                 <table class="table table-sm mb-0">
                     <tbody>
-                    @foreach (var point in Model.RecentUploads)
+                    @for (var index = 0; index < Model.RecentUploads.Count; index++)
                     {
+                        var point = Model.RecentUploads[index];
                         <tr>
                             <td class="text-nowrap">@point.Date.ToString("MM-dd")</td>
                             <td class="w-100">
-                                <div class="progress" style="height:.5rem">
-                                    <div class="progress-bar" style="width:@(point.Uploads * 100 / Math.Max(1, peak))%"></div>
+                                <div class="progress upload-spark">
+                                    <div class="progress-bar" id="upload-bar-@index"></div>
                                 </div>
                             </td>
                             <td class="text-end">@point.Uploads</td>

@@ -4,6 +4,7 @@ using Pinkterest.Domain.Constants;
 using Pinkterest.Infrastructure;
 using Pinkterest.Infrastructure.Persistence.Seeding;
 using Pinkterest.Web.Observability;
+using Pinkterest.Web.Security;
 using Pinkterest.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +49,8 @@ else
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+app.UseSecurityHeaders();
 
 if (builder.Configuration.GetValue("Https:Redirect", true))
 {

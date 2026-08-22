@@ -30,7 +30,7 @@
                 <h2 class="h6">Uploads today</h2>
                 <p class="display-6 mb-1">@Model.UploadsToday <small class="fs-6 text-body-secondary">/ @Model.DailyUploadLimit</small></p>
                 <div class="progress" role="progressbar" aria-valuenow="@Model.DailyUploadPercentage" aria-valuemin="0" aria-valuemax="100">
-                    <div class="progress-bar" style="width: @Model.DailyUploadPercentage.ToString("0.##")%"></div>
+                    <div class="progress-bar" id="daily-upload-bar"></div>
                 </div>
                 <p class="small text-body-secondary mt-2 mb-0">@Model.RemainingUploadsToday remaining today</p>
             </div>
@@ -46,7 +46,7 @@
                     <small class="fs-6 text-body-secondary">/ @ByteSize.Humanize(Model.MaxTotalStorageBytes)</small>
                 </p>
                 <div class="progress" role="progressbar" aria-valuenow="@Model.StoragePercentage" aria-valuemin="0" aria-valuemax="100">
-                    <div class="progress-bar" style="width: @Model.StoragePercentage.ToString("0.##")%"></div>
+                    <div class="progress-bar" id="storage-bar"></div>
                 </div>
                 <p class="small text-body-secondary mt-2 mb-0">@ByteSize.Humanize(Model.RemainingStorageBytes) remaining</p>
             </div>
@@ -61,3 +61,8 @@
     <dt class="col-sm-4">Uploaded today</dt>
     <dd class="col-sm-8">@ByteSize.Humanize(Model.BytesUploadedToday)</dd>
 </dl>
+
+<style nonce="@Context.CspNonce()">
+    #daily-upload-bar { width: @Model.DailyUploadPercentage.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%; }
+    #storage-bar { width: @Model.StoragePercentage.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%; }
+</style>

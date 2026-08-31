@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using Pinkterest.Application.Common.Interfaces;
 using Pinkterest.Domain.Constants;
@@ -17,6 +18,21 @@ builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy(RateLimitPolicies.Authentication, context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = builder.Configuration.GetValue("RateLimiting:AuthenticationPermitLimit", 10),
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
 });
 
 builder.Services.AddAuthorizationBuilder()
@@ -57,6 +73,7 @@ if (builder.Configuration.GetValue("Https:Redirect", true))
     app.UseHttpsRedirection();
 }
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

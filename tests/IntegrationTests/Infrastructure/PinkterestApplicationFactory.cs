@@ -11,6 +11,10 @@ public sealed class PinkterestApplicationFactory(string connectionString, string
         builder.UseEnvironment("Development");
         builder.UseSetting("ConnectionStrings:Default", connectionString);
         builder.UseSetting("Storage:Provider", "Local");
+
+        // TestServer leaves Connection.RemoteIpAddress null, so every request in the
+        // suite shares a single rate limiting partition and the tests throttle each other.
+        builder.UseSetting("RateLimiting:AuthenticationPermitLimit", "10000");
         builder.UseSetting("Storage:LocalRootPath", storageRoot);
         builder.UseSetting("Seed:AdministratorEmail", TestCredentials.AdministratorEmail);
         builder.UseSetting("Seed:AdministratorPassword", TestCredentials.AdministratorPassword);

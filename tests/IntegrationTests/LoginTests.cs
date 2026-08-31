@@ -32,7 +32,7 @@ public class LoginTests(PinkterestFixture fixture)
         var wrongPassword = await BodyOfFailedLoginAsync(
             fixture, TestCredentials.AdministratorEmail, "Wrong!Password#2026");
 
-        const string message = "The email address or password is incorrect.";
+        const string message = "The email address or password is incorrect, or the account is temporarily locked";
 
         unknownUser.Should().Contain(message);
         wrongPassword.Should().Contain(message,

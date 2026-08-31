@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Pinkterest.Application.Accounts;
 using Pinkterest.Application.Accounts.External;
 using Pinkterest.Application.Common.Interfaces;
 using Pinkterest.Application.Packages;
 using Pinkterest.Application.Usage;
 using Pinkterest.Web.Models.Account;
+using Pinkterest.Web.Security;
 
 namespace Pinkterest.Web.Controllers;
 
@@ -32,6 +34,7 @@ public class AccountController(
 
     [HttpPost]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Authentication)]
     public async Task<IActionResult> Register(RegisterViewModel model, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
@@ -68,6 +71,7 @@ public class AccountController(
 
     [HttpPost]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Authentication)]
     public async Task<IActionResult> Login(LoginViewModel model, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)

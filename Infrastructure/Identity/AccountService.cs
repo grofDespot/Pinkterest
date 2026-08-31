@@ -23,6 +23,11 @@ public sealed class AccountService(
     TimeProvider timeProvider,
     ILogger<AccountService> logger) : IAccountService
 {
+    private static string? _decoyHash;
+
+    private string DecoyHash => _decoyHash ??=
+        userManager.PasswordHasher.HashPassword(new ApplicationUser(), Guid.NewGuid().ToString());
+
     [Audited(AuditActions.Register, EntityType = nameof(ApplicationUser))]
     [Measured(AuditActions.Register)]
     public async Task<Result<Guid>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
@@ -70,6 +75,9 @@ public sealed class AccountService(
 
         if (user is null)
         {
+            userManager.PasswordHasher.VerifyHashedPassword(
+                new ApplicationUser(), DecoyHash, request.Password);
+
             await auditLog.RecordAsync(
                 new AuditEntry(AuditActions.LoginFailed, Succeeded: false, UserName: request.Email),
                 cancellationToken);
@@ -82,13 +90,16 @@ public sealed class AccountService(
 
         if (attempt.IsLockedOut)
         {
+            userManager.PasswordHasher.VerifyHashedPassword(
+                new ApplicationUser(), DecoyHash, request.Password);
+
             logger.LogWarning("Login blocked for locked out user {UserId}.", user.Id);
 
             await auditLog.RecordAsync(
                 new AuditEntry(AuditActions.LoginFailed, Succeeded: false, UserId: user.Id, UserName: user.Email),
                 cancellationToken);
 
-            return Result.Failure(AccountErrors.LockedOut);
+            return Result.Failure(AccountErrors.InvalidCredentials);
         }
 
         await auditLog.RecordAsync(

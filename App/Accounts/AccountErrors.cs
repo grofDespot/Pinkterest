@@ -5,7 +5,8 @@ namespace Pinkterest.Application.Accounts;
 public static class AccountErrors
 {
     public static readonly Error InvalidCredentials =
-        new("Login.InvalidCredentials", "The email address or password is incorrect.");
+        new("Login.InvalidCredentials",
+            "The email address or password is incorrect, or the account is temporarily locked after too many failed attempts.");
 
     public static readonly Error LockedOut =
         new("Login.LockedOut", "This account is temporarily locked after too many failed attempts. Try again later.");

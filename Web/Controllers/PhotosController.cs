@@ -82,7 +82,7 @@ public class PhotosController(
         if (!ModelState.IsValid)
         {
             TempData["PresetError"] = "Give the preset a name.";
-            return RedirectToAction("Details", "Gallery", new { id = model.PhotoId });
+            return RedirectToAction("Details", "Gallery", new { id = model.PhotoId!.Value });
         }
 
         var result = await presetService.SaveAsync(
@@ -91,7 +91,7 @@ public class PhotosController(
         TempData[result.IsSuccess ? "PresetSaved" : "PresetError"] =
             result.IsSuccess ? model.Name : result.Error.Message;
 
-        return RedirectToAction("Details", "Gallery", new { id = model.PhotoId });
+        return RedirectToAction("Details", "Gallery", new { id = model.PhotoId!.Value });
     }
 
     [HttpPost]

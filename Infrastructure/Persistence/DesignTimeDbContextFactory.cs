@@ -5,12 +5,15 @@ namespace Pinkterest.Infrastructure.Persistence;
 
 public sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
 {
-    private const string FallbackConnection =
-        "Host=localhost;Port=5432;Database=pinkterest;Username=pinkterest;Password=pinkterest";
-
     public ApplicationDbContext CreateDbContext(string[] args)
     {
-        var connectionString = Environment.GetEnvironmentVariable("PINKTEREST_CONNECTION") ?? FallbackConnection;
+        var connectionString = Environment.GetEnvironmentVariable("PINKTEREST_CONNECTION");
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException(
+                "Set PINKTEREST_CONNECTION to a PostgreSQL connection string before running design-time tooling.");
+        }
 
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseNpgsql(connectionString)

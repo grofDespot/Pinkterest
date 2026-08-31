@@ -7,7 +7,7 @@ public sealed class ChangePackageViewModel
 {
     [Required(ErrorMessage = "Choose a package.")]
     [Display(Name = "New package")]
-    public Guid TargetPackageId { get; set; }
+    public Guid? TargetPackageId { get; set; }
 
     public Guid CurrentPackageId { get; set; }
 

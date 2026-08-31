@@ -28,7 +28,7 @@ public sealed class RegisterViewModel
 
     [Required(ErrorMessage = "Choose a package.")]
     [Display(Name = "Package")]
-    public Guid PackageId { get; set; }
+    public Guid? PackageId { get; set; }
 
     public IReadOnlyList<PackageDto> Packages { get; set; } = [];
 }

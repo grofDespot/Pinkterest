@@ -12,7 +12,8 @@
 
 <form asp-action="Photos" method="get" class="row g-2 mb-4">
     <div class="col-auto">
-        <input name="author" value="@ViewData["Author"]" class="form-control" placeholder="Author" />
+        <label for="author" class="visually-hidden">Author</label>
+        <input id="author" name="author" value="@ViewData["Author"]" class="form-control" placeholder="Author" />
     </div>
     <div class="col-auto">
         <button type="submit" class="btn btn-outline-primary">Filter</button>

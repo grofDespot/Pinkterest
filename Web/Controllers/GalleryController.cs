@@ -170,7 +170,7 @@ public class GalleryController(
         }
 
         var result = await editService.UpdateDetailsAsync(
-            model.Id,
+            model.Id!.Value,
             editorId,
             currentUser.IsInRole(Roles.Administrator),
             model.Description,
@@ -183,7 +183,7 @@ public class GalleryController(
             return View(model);
         }
 
-        return RedirectToAction(nameof(Details), new { id = model.Id });
+        return RedirectToAction(nameof(Details), new { id = model.Id!.Value });
     }
 
     private async Task<IActionResult> StreamAsync(

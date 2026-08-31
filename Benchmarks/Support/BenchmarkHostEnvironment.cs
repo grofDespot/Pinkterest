@@ -9,7 +9,8 @@ public sealed class BenchmarkHostEnvironment : IHostEnvironment
 
     public string ApplicationName { get; set; } = "Pinkterest.Benchmarks";
 
-    public string ContentRootPath { get; set; } = Path.GetTempPath();
+    public string ContentRootPath { get; set; } =
+        Directory.CreateTempSubdirectory("pinkterest-benchmarks").FullName;
 
     public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
 }

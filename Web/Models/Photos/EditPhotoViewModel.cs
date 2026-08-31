@@ -4,7 +4,8 @@ namespace Pinkterest.Web.Models.Photos;
 
 public sealed class EditPhotoViewModel
 {
-    public Guid Id { get; set; }
+    [Required]
+    public Guid? Id { get; set; }
 
     [StringLength(2000)]
     public string Description { get; set; } = string.Empty;

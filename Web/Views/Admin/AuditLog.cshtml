@@ -7,10 +7,12 @@
 
 <form asp-action="AuditLog" method="get" class="row g-2 mb-3">
     <div class="col-auto">
-        <input name="actionFilter" value="@ViewData["ActionFilter"]" class="form-control" placeholder="Action" />
+        <label for="actionFilter" class="visually-hidden">Action</label>
+        <input id="actionFilter" name="actionFilter" value="@ViewData["ActionFilter"]" class="form-control" placeholder="Action" />
     </div>
     <div class="col-auto">
-        <input name="userName" value="@ViewData["UserName"]" class="form-control" placeholder="User" />
+        <label for="userName" class="visually-hidden">User</label>
+        <input id="userName" name="userName" value="@ViewData["UserName"]" class="form-control" placeholder="User" />
     </div>
     <div class="col-auto">
         <button type="submit" class="btn btn-outline-primary">Filter</button>

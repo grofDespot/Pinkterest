@@ -6,7 +6,8 @@ namespace Pinkterest.Web.Models.Admin;
 
 public sealed class EditUserViewModel
 {
-    public Guid Id { get; set; }
+    [Required]
+    public Guid? Id { get; set; }
 
     [Required]
     [StringLength(128, MinimumLength = 2)]
@@ -15,7 +16,7 @@ public sealed class EditUserViewModel
 
     [Required]
     [Display(Name = "Package")]
-    public Guid PackageId { get; set; }
+    public Guid? PackageId { get; set; }
 
     [Display(Name = "Clear lockout")]
     public bool ClearLockout { get; set; }

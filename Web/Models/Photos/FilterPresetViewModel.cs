@@ -11,7 +11,8 @@ public sealed class SavePresetViewModel
     [Display(Name = "Preset name")]
     public string Name { get; set; } = string.Empty;
 
-    public Guid PhotoId { get; set; }
+    [Required]
+    public Guid? PhotoId { get; set; }
 
     public ImageOutputFormat Format { get; set; } = ImageOutputFormat.Original;
 

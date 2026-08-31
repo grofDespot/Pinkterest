@@ -43,7 +43,7 @@ public class AccountController(
             return View(model);
         }
 
-        var request = new RegisterRequest(model.DisplayName, model.Email, model.Password, model.PackageId);
+        var request = new RegisterRequest(model.DisplayName, model.Email, model.Password, model.PackageId!.Value);
         var result = await accountService.RegisterAsync(request, cancellationToken);
 
         if (result.IsFailure)
@@ -153,7 +153,7 @@ public class AccountController(
         }
 
         var result = await externalAuthentication.CompleteRegistrationAsync(
-            model.DisplayName, model.Email, model.PackageId, cancellationToken);
+            model.DisplayName, model.Email, model.PackageId!.Value, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -218,7 +218,7 @@ public class AccountController(
         if (ModelState.IsValid)
         {
             var result = await packageChangeService.RequestChangeAsync(
-                userId, model.TargetPackageId, cancellationToken);
+                userId, model.TargetPackageId!.Value, cancellationToken);
 
             if (result.IsSuccess)
             {

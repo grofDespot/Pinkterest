@@ -48,6 +48,7 @@
         <div class="card h-100"><div class="card-body">
             <h2 class="h6">Users per package</h2>
             <table class="table table-sm mb-0">
+                <thead><tr><th scope="col">Package</th><th scope="col" class="text-end">Users</th></tr></thead>
                 <tbody>
                 @foreach (var row in Model.PackageDistribution)
                 {
@@ -62,6 +63,7 @@
         <div class="card h-100"><div class="card-body">
             <h2 class="h6">Top uploaders</h2>
             <table class="table table-sm mb-0">
+                <thead><tr><th scope="col">User</th><th scope="col" class="text-end">Photos</th><th scope="col" class="text-end">Stored</th></tr></thead>
                 <tbody>
                 @foreach (var row in Model.TopUploaders)
                 {
@@ -94,6 +96,7 @@
                     }
                 </style>
                 <table class="table table-sm mb-0">
+                    <thead><tr><th scope="col">Date</th><th scope="col">Uploads</th><th scope="col" class="text-end">Count</th></tr></thead>
                     <tbody>
                     @for (var index = 0; index < Model.RecentUploads.Count; index++)
                     {

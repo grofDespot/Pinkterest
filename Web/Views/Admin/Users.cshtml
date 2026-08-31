@@ -7,7 +7,8 @@
 
 <form asp-action="Users" method="get" class="row g-2 mb-4">
     <div class="col-auto">
-        <input name="search" value="@ViewData["Search"]" class="form-control" placeholder="Name or email" />
+        <label for="search" class="visually-hidden">Name or email</label>
+        <input id="search" name="search" value="@ViewData["Search"]" class="form-control" placeholder="Name or email" />
     </div>
     <div class="col-auto">
         <button type="submit" class="btn btn-outline-primary">Search</button>

@@ -58,7 +58,8 @@
                     <h2 class="h6">Download with a saved preset</h2>
                     <form asp-action="Download" method="get" class="d-flex gap-2">
                         <input type="hidden" name="id" value="@Model.Id" />
-                        <select name="presetId" class="form-select form-select-sm">
+                        <label for="presetId" class="visually-hidden">Saved preset</label>
+                        <select id="presetId" name="presetId" class="form-select form-select-sm">
                             @foreach (var preset in presets)
                             {
                                 <option value="@preset.Id">@preset.Name — @preset.Summary</option>

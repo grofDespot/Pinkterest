@@ -53,7 +53,7 @@ public class AdminController(
     {
         if (!ModelState.IsValid)
         {
-            model.Detail = await sender.SendAsync(new GetUserDetailQuery(model.Id), cancellationToken);
+            model.Detail = await sender.SendAsync(new GetUserDetailQuery(model.Id!.Value), cancellationToken);
             model.Packages = await packageCatalog.GetAllAsync(cancellationToken);
             return View(model);
         }
@@ -61,11 +61,11 @@ public class AdminController(
         return await ExecuteAuditedAsync(
             "user.update",
             () => sender.SendAsync(
-                new UpdateUserCommand(model.Id, model.DisplayName, model.PackageId, model.ClearLockout),
+                new UpdateUserCommand(model.Id!.Value, model.DisplayName, model.PackageId!.Value, model.ClearLockout),
                 cancellationToken),
             () => RedirectToAction(nameof(Users)),
             entityType: "ApplicationUser",
-            entityId: model.Id.ToString(),
+            entityId: model.Id!.Value.ToString(),
             cancellationToken: cancellationToken);
     }
 

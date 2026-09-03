@@ -62,6 +62,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       Https__Redirect: "false"
       ConnectionStrings__Default: "Host=postgres;Port=5432;Database=pinkterest;Username=pinkterest;Password=pinkterest"
+      Jwt__SigningKey: "${JWT_SIGNING_KEY:?set JWT_SIGNING_KEY in .env}"
       Storage__Provider: "S3"
       Storage__LocalRootPath: "/tmp/pinkterest-storage"
       Storage__S3__BucketName: "pinkterest-photos"

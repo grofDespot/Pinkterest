@@ -6,6 +6,10 @@ public static class AuditActions
     public const string Login = "user.login";
     public const string LoginFailed = "user.login.failed";
     public const string Logout = "user.logout";
+    public const string TokenIssued = "token.issued";
+    public const string TokenRefreshed = "token.refreshed";
+    public const string TokenRevoked = "token.revoked";
+    public const string TokenReuseDetected = "token.reuse.detected";
     public const string PhotoUpload = "photo.upload";
     public const string PhotoEdit = "photo.edit";
     public const string PhotoDownload = "photo.download";

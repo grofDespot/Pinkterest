@@ -1,6 +1,10 @@
+using System.Security.Claims;
+using System.Text;
 using Amazon.S3;
 using Castle.DynamicProxy;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Pinkterest.Application.Accounts;
 using Pinkterest.Application.Accounts.External;
 using Pinkterest.Application.Admin.Models;
+using Pinkterest.Application.Auth;
 using Pinkterest.Application.Admin.Requests;
 using Pinkterest.Application.Common.Auditing;
 using Pinkterest.Application.Common.Events;
@@ -28,6 +33,7 @@ using Pinkterest.Domain.Events;
 using Pinkterest.Infrastructure.Admin;
 using Pinkterest.Infrastructure.Auditing;
 using Pinkterest.Infrastructure.Events;
+using Pinkterest.Infrastructure.Auth;
 using Pinkterest.Infrastructure.Identity;
 using Pinkterest.Infrastructure.Interception;
 using Pinkterest.Infrastructure.Mediation;
@@ -62,6 +68,7 @@ public static class DependencyInjection
         services.AddOptions<SeedOptions>().Bind(configuration.GetSection(SeedOptions.SectionName));
         services.AddOptions<StorageOptions>().Bind(configuration.GetSection(StorageOptions.SectionName));
         services.AddOptions<S3StorageOptions>().Bind(configuration.GetSection(S3StorageOptions.SectionName));
+        services.AddOptions<JwtOptions>().Bind(configuration.GetSection(JwtOptions.SectionName));
         services.AddScoped<DatabaseSeeder>();
 
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -120,6 +127,8 @@ public static class DependencyInjection
         services.AddInterceptedScoped<IPhotoDownloadService, PhotoDownloadService>();
         services.AddInterceptedScoped<IFilterPresetService, FilterPresetService>();
 
+        services.AddInterceptedScoped<ITokenService, TokenService>();
+
         services.AddScoped<IAuditLog, AuditLog>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IDomainEventHandler<PhotoUploadedEvent>, LogPhotoUploadedHandler>();
@@ -151,6 +160,27 @@ public static class DependencyInjection
             .Get<ExternalAuthenticationOptions>() ?? new ExternalAuthenticationOptions();
 
         var builder = services.AddAuthentication();
+
+        var jwt = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
+
+        if (!string.IsNullOrWhiteSpace(jwt.SigningKey))
+        {
+            builder.AddJwtBearer(bearer =>
+            {
+                bearer.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwt.Issuer,
+                    ValidAudience = jwt.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey)),
+                    ClockSkew = TimeSpan.Zero,
+                    RoleClaimType = ClaimTypes.Role
+                };
+            });
+        }
 
         if (options.Google.IsConfigured)
         {

@@ -12,6 +12,7 @@ namespace Pinkterest.Web.Controllers.Api;
 
 [ApiController]
 [Route("api/photos/import")]
+[IgnoreAntiforgeryToken]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public sealed class ImageImportController(
     IRemoteImageFetcher fetcher,
@@ -20,7 +21,10 @@ public sealed class ImageImportController(
     [HttpPost]
     public async Task<IActionResult> Import(ImportImageRequest request, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub), out var ownerId))
+        var subject = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+        if (!Guid.TryParse(subject, out var ownerId))
         {
             return Forbid();
         }
@@ -34,9 +38,16 @@ public sealed class ImageImportController(
 
         using var content = new MemoryStream(fetched.Value.Content);
 
+        var extension = fetched.Value.ContentType switch
+        {
+            "image/png" => ".png",
+            "image/bmp" => ".bmp",
+            _ => ".jpg"
+        };
+
         var upload = new UploadPhotoRequest(
             ownerId,
-            FileName: "imported",
+            FileName: $"imported{extension}",
             fetched.Value.ContentType,
             fetched.Value.Content.Length,
             content,

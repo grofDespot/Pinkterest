@@ -18,6 +18,8 @@ public sealed class PinkterestApplicationFactory(string connectionString, string
         builder.UseSetting("Storage:LocalRootPath", storageRoot);
         builder.UseSetting("Seed:AdministratorEmail", TestCredentials.AdministratorEmail);
         builder.UseSetting("Seed:AdministratorPassword", TestCredentials.AdministratorPassword);
+        builder.UseSetting("Jwt:SigningKey", TestCredentials.JwtSigningKey);
+        builder.UseSetting("PresetPackage:SigningKey", TestCredentials.PresetSigningKey);
         builder.UseSetting("Authentication:Google:ClientId", string.Empty);
         builder.UseSetting("Authentication:Google:ClientSecret", string.Empty);
         builder.UseSetting("Authentication:GitHub:ClientId", string.Empty);

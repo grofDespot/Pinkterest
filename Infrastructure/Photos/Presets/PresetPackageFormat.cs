@@ -20,10 +20,6 @@ public sealed class PresetPackageFormat
 
     private readonly byte[] _key;
 
-    // The deserialization target is fixed to FilterPresetDefinition, so no type named
-    // in the payload can be instantiated — there is no polymorphic type handling to abuse.
-    // UnmappedMemberHandling.Disallow rejects any field outside that shape, including a
-    // smuggled $type discriminator, and MaxDepth bounds nesting.
     private static readonly JsonSerializerOptions ReadOptions = new()
     {
         MaxDepth = 8,
@@ -50,7 +46,6 @@ public sealed class PresetPackageFormat
 
     public Result<FilterPresetDefinition> Read(byte[] package)
     {
-        // 1. Structural check: is this even our format?
         if (package.Length < HeaderLength + HmacLength)
         {
             return Result.Failure<FilterPresetDefinition>(FilterPresetErrors.BadFormat);
@@ -61,13 +56,11 @@ public sealed class PresetPackageFormat
             return Result.Failure<FilterPresetDefinition>(FilterPresetErrors.BadFormat);
         }
 
-        // 2. Known version only.
         if (package[MagicLength] != Version)
         {
             return Result.Failure<FilterPresetDefinition>(FilterPresetErrors.UnsupportedVersion);
         }
 
-        // 3. Declared length checked against the actual stream before trusting it.
         var declared = BinaryPrimitives.ReadInt32LittleEndian(package.AsSpan(MagicLength + 1, 4));
 
         if (declared < 0 || declared > MaxPayloadBytes || package.Length != HeaderLength + declared + HmacLength)
@@ -75,7 +68,6 @@ public sealed class PresetPackageFormat
             return Result.Failure<FilterPresetDefinition>(FilterPresetErrors.BadFormat);
         }
 
-        // 4. Integrity: verify the HMAC before anything parses the payload.
         var signed = package.AsSpan(0, HeaderLength + declared);
         var expected = package.AsSpan(HeaderLength + declared, HmacLength);
         var actual = HMACSHA256.HashData(_key, signed);
@@ -85,7 +77,6 @@ public sealed class PresetPackageFormat
             return Result.Failure<FilterPresetDefinition>(FilterPresetErrors.Tampered);
         }
 
-        // 5. Whitelisted deserialization: only FilterPresetDefinition may be built.
         try
         {
             var payload = package.AsSpan(HeaderLength, declared);

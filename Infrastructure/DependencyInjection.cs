@@ -41,7 +41,9 @@ using Pinkterest.Infrastructure.Observability;
 using Pinkterest.Infrastructure.Packages;
 using Pinkterest.Infrastructure.Persistence;
 using Pinkterest.Infrastructure.Persistence.Seeding;
+using Pinkterest.Application.Photos.Import;
 using Pinkterest.Infrastructure.Photos;
+using Pinkterest.Infrastructure.Photos.Import;
 using Pinkterest.Infrastructure.Storage;
 using Pinkterest.Infrastructure.Usage;
 
@@ -128,6 +130,18 @@ public static class DependencyInjection
         services.AddInterceptedScoped<IFilterPresetService, FilterPresetService>();
 
         services.AddInterceptedScoped<ITokenService, TokenService>();
+
+        services.AddHttpClient<IRemoteImageFetcher, RemoteImageFetcher>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(10);
+                client.MaxResponseContentBufferSize = 10 * 1024 * 1024;
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Pinkterest-Import/1.0");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+            {
+                AllowAutoRedirect = false,
+                ConnectTimeout = TimeSpan.FromSeconds(5)
+            });
 
         services.AddScoped<IAuditLog, AuditLog>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();

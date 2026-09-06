@@ -9,6 +9,8 @@ public sealed record LoginApiRequest(
 
 public sealed record RefreshApiRequest([Required] string RefreshToken);
 
+public sealed record ImportImageRequest([Required] string Url, string? Description);
+
 public sealed record TokenResponse(
     string AccessToken,
     string RefreshToken,

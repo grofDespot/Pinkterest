@@ -44,6 +44,7 @@ using Pinkterest.Infrastructure.Persistence.Seeding;
 using Pinkterest.Application.Photos.Import;
 using Pinkterest.Infrastructure.Photos;
 using Pinkterest.Infrastructure.Photos.Import;
+using Pinkterest.Infrastructure.Photos.Presets;
 using Pinkterest.Infrastructure.Storage;
 using Pinkterest.Infrastructure.Usage;
 
@@ -128,6 +129,14 @@ public static class DependencyInjection
         services.AddInterceptedScoped<IPhotoSearchService, PhotoSearchService>();
         services.AddInterceptedScoped<IPhotoDownloadService, PhotoDownloadService>();
         services.AddInterceptedScoped<IFilterPresetService, FilterPresetService>();
+
+        var presetKey = configuration["PresetPackage:SigningKey"];
+        services.AddSingleton(new PresetPackageFormat(
+            string.IsNullOrWhiteSpace(presetKey)
+                ? throw new InvalidOperationException(
+                    "PresetPackage:SigningKey is not configured. Set it with dotnet user-secrets or an environment variable.")
+                : System.Text.Encoding.UTF8.GetBytes(presetKey)));
+        services.AddInterceptedScoped<IPresetPackageService, PresetPackageService>();
 
         services.AddInterceptedScoped<ITokenService, TokenService>();
 
